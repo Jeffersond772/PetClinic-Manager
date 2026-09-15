@@ -1,0 +1,148 @@
+const citaModel = require('../models/cita.model');
+
+async function listar(req, res) {
+  try {
+    const citas = await citaModel.listar();
+    res.json(citas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+async function obtener(req, res) {
+  try {
+    const cita = await citaModel.obtenerPorId(req.params.id);
+    if (!cita) {
+      return res.status(404).json({ mensaje: 'Cita no encontrada' });
+    }
+    res.json(cita);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+// CU13: GET /api/citas/agenda?desde=2026-09-01&hasta=2026-09-07&id_veterinario=3
+async function agenda(req, res) {
+  const { desde, hasta, id_veterinario } = req.query;
+
+  if (!desde || !hasta) {
+    return res.status(400).json({ mensaje: 'Debes indicar el rango de fechas (desde y hasta)' });
+  }
+
+  try {
+    const citas = await citaModel.listarPorRangoFecha(desde, hasta, id_veterinario);
+
+    if (citas.length === 0) {
+      // Flujo alternativo CU13: no existen citas programadas para el período
+      return res.json({ mensaje: 'No existen citas programadas para el período seleccionado', citas: [] });
+    }
+
+    res.json({ citas });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+// CU07: agendar cita
+async function crear(req, res) {
+  const { id_paciente, id_propietario, id_veterinario, fecha, hora, motivo } = req.body;
+
+  if (!id_paciente || !id_propietario || !id_veterinario || !fecha || !hora) {
+    return res.status(400).json({ mensaje: 'Paciente, propietario, veterinario, fecha y hora son obligatorios' });
+  }
+
+  try {
+    // Flujo alternativo CU07: horario ya ocupado
+    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora);
+    if (hayConflicto) {
+      return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
+    }
+
+    const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo });
+    res.status(201).json({ mensaje: 'Cita agendada correctamente', id_cita });
+
+  } catch (error) {
+    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({ mensaje: 'El paciente, propietario o veterinario indicados no existen' });
+    }
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
+    }
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+// CU12: modificar cita
+async function actualizar(req, res) {
+  const { fecha, hora, motivo, id_veterinario } = req.body;
+
+  if (!fecha || !hora || !id_veterinario) {
+    return res.status(400).json({ mensaje: 'Fecha, hora y veterinario son obligatorios' });
+  }
+
+  try {
+    const cita = await citaModel.obtenerPorId(req.params.id);
+    if (!cita) {
+      return res.status(404).json({ mensaje: 'Cita no encontrada' });
+    }
+
+    // Flujo alternativo CU12: el nuevo horario ya está ocupado
+    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora, req.params.id);
+    if (hayConflicto) {
+      return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
+    }
+
+    await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario });
+    res.json({ mensaje: 'Cita actualizada correctamente' });
+
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
+    }
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+// CU12: cancelar cita
+async function cancelar(req, res) {
+  try {
+    const cita = await citaModel.obtenerPorId(req.params.id);
+    if (!cita) {
+      return res.status(404).json({ mensaje: 'Cita no encontrada' });
+    }
+    await citaModel.cambiarEstado(req.params.id, 'cancelada');
+    res.json({ mensaje: 'Cita cancelada correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+// Marcar como atendida o no_asistio (útil para el flujo del día de la cita)
+async function cambiarEstado(req, res) {
+  const { estado } = req.body;
+  const estadosValidos = ['programada', 'atendida', 'cancelada', 'no_asistio'];
+
+  if (!estadosValidos.includes(estado)) {
+    return res.status(400).json({ mensaje: 'Estado inválido' });
+  }
+
+  try {
+    const cita = await citaModel.obtenerPorId(req.params.id);
+    if (!cita) {
+      return res.status(404).json({ mensaje: 'Cita no encontrada' });
+    }
+    await citaModel.cambiarEstado(req.params.id, estado);
+    res.json({ mensaje: 'Estado de la cita actualizado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+  }
+}
+
+module.exports = { listar, obtener, agenda, crear, actualizar, cancelar, cambiarEstado };

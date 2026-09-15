@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Citas</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Agenda de citas</h2>
+        <button id="btnNuevaCita" class="btn-primario">Agendar cita</button>
+      </div>
+
+      <div class="filtros-agenda">
+        <div>
+          <label for="filtroDesde">Desde</label>
+          <input type="date" id="filtroDesde">
+        </div>
+        <div>
+          <label for="filtroHasta">Hasta</label>
+          <input type="date" id="filtroHasta">
+        </div>
+        <div>
+          <label for="filtroVeterinario">Veterinario</label>
+          <select id="filtroVeterinario">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="filtro-botones">
+          <button id="btnHoy" class="btn-secundario">Hoy</button>
+          <button id="btnSemana" class="btn-secundario">Esta semana</button>
+        </div>
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Paciente</th>
+            <th>Propietario</th>
+            <th>Veterinario</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaCitas"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Modal: crear/editar cita -->
+  <div id="modalCita" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModalCita">Agendar cita</h3>
+      <form id="formCita">
+        <input type="hidden" id="idCita">
+        <input type="hidden" id="idPropietarioSeleccionado">
+
+        <label for="propietarioTexto">Propietario</label>
+        <input type="text" id="propietarioTexto" placeholder="Escribe para buscar..." autocomplete="off">
+        <div id="resultadosPropietario" class="resultados-autocompletar"></div>
+
+        <label for="paciente">Paciente</label>
+        <select id="paciente" required>
+          <option value="">Primero selecciona un propietario</option>
+        </select>
+
+        <label for="veterinario">Veterinario</label>
+        <select id="veterinario" required>
+          <option value="">Selecciona un veterinario</option>
+        </select>
+
+        <label for="fechaCita">Fecha</label>
+        <input type="date" id="fechaCita" required>
+
+        <label for="horaCita">Hora</label>
+        <input type="time" id="horaCita" required>
+
+        <label for="motivoCita">Motivo</label>
+        <input type="text" id="motivoCita">
+
+        <p id="mensajeErrorCita" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarModalCita" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/citas.js"></script>
+</body>
+</html>

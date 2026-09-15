@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Inventario</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Inventario</h2>
+        <button id="btnNuevoProducto" class="btn-primario">Nuevo producto</button>
+      </div>
+
+      <div id="alertasStock" class="alertas-stock"></div>
+
+      <div class="buscador">
+        <input type="text" id="inputBuscar" placeholder="Buscar producto...">
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Existencias</th>
+            <th>Vencimiento</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaProductos"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Modal: crear/editar producto -->
+  <div id="modalProducto" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModalProducto">Nuevo producto</h3>
+      <form id="formProducto">
+        <input type="hidden" id="idProducto">
+
+        <label for="nombreProducto">Nombre</label>
+        <input type="text" id="nombreProducto" required>
+
+        <label for="categoria">Categoría</label>
+        <select id="categoria" required>
+          <option value="">Selecciona una categoría</option>
+        </select>
+
+        <label for="precio">Precio</label>
+        <input type="number" step="0.01" id="precio" required>
+
+        <label for="unidadMedida">Unidad de medida</label>
+        <input type="text" id="unidadMedida" placeholder="unidad, ml, mg, caja...">
+
+        <label for="stockMinimo">Stock mínimo (para alertas)</label>
+        <input type="number" step="0.01" id="stockMinimo" value="0">
+
+        <label for="fechaVencimiento">Fecha de vencimiento (si aplica)</label>
+        <input type="date" id="fechaVencimiento">
+
+        <label for="descripcionProducto">Descripción</label>
+        <textarea id="descripcionProducto" rows="2"></textarea>
+
+        <p id="mensajeErrorProducto" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarProducto" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: registrar entrada/salida -->
+  <div id="modalMovimiento" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModalMovimiento">Registrar entrada</h3>
+      <p class="texto-secundario" id="productoMovimientoNombre"></p>
+      <form id="formMovimiento">
+        <input type="hidden" id="idProductoMovimiento">
+        <input type="hidden" id="tipoMovimiento">
+
+        <label for="cantidadMovimiento">Cantidad</label>
+        <input type="number" step="0.01" id="cantidadMovimiento" required>
+
+        <div id="grupoCostoUnitario">
+          <label for="costoUnitario">Costo unitario (solo entradas)</label>
+          <input type="number" step="0.01" id="costoUnitario">
+        </div>
+
+        <label for="motivoMovimiento">Motivo</label>
+        <select id="motivoMovimiento"></select>
+
+        <p id="mensajeErrorMovimiento" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarMovimiento" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/productos.js"></script>
+</body>
+</html>

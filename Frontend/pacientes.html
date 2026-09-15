@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Pacientes</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2 id="tituloSeccion">Pacientes</h2>
+        <button id="btnNuevoPaciente" class="btn-primario">Nuevo paciente</button>
+      </div>
+
+      <div class="buscador">
+        <input type="text" id="inputBuscar" placeholder="Buscar por nombre de paciente o propietario...">
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Especie</th>
+            <th>Raza</th>
+            <th>Propietario</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaPacientes"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Modal para crear/editar paciente -->
+  <div id="modalPaciente" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModal">Nuevo paciente</h3>
+      <form id="formPaciente">
+        <input type="hidden" id="idPaciente">
+        <input type="hidden" id="idPropietarioSeleccionado">
+
+        <label for="nombre">Nombre de la mascota</label>
+        <input type="text" id="nombre" required>
+
+        <label for="propietarioTexto">Propietario</label>
+        <input type="text" id="propietarioTexto" placeholder="Escribe para buscar..." autocomplete="off">
+        <div id="resultadosPropietario" class="resultados-autocompletar"></div>
+
+        <label for="especie">Especie</label>
+        <select id="especie" required>
+          <option value="">Selecciona una especie</option>
+        </select>
+
+        <label for="raza">Raza</label>
+        <select id="raza">
+          <option value="">Selecciona una raza (opcional)</option>
+        </select>
+
+        <label for="sexo">Sexo</label>
+        <select id="sexo">
+          <option value="desconocido">Desconocido</option>
+          <option value="macho">Macho</option>
+          <option value="hembra">Hembra</option>
+        </select>
+
+        <label for="fechaNacimiento">Fecha de nacimiento</label>
+        <input type="date" id="fechaNacimiento">
+
+        <label for="peso">Peso (kg)</label>
+        <input type="number" step="0.01" id="peso">
+
+        <label for="caracteristicas">Características</label>
+        <textarea id="caracteristicas" rows="2"></textarea>
+
+        <p id="mensajeErrorModal" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarModal" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script src="js/common.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/pacientes.js"></script>
+</body>
+</html>

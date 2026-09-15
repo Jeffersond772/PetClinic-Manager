@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Panel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu">
+      <!-- Los enlaces se generan dinámicamente según el rol -->
+    </nav>
+
+    <main class="contenido">
+      <h2 id="saludo">Bienvenido</h2>
+      <p>Selecciona una opción del menú para comenzar.</p>
+    </main>
+  </div>
+  <script src="js/common.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

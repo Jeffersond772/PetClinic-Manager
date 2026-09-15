@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Propietarios</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Propietarios</h2>
+        <button id="btnNuevoPropietario" class="btn-primario">Nuevo propietario</button>
+      </div>
+
+      <div class="buscador">
+        <input type="text" id="inputBuscar" placeholder="Buscar por nombre o identificación...">
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Identificación</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Mascotas</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaPropietarios">
+          <!-- Filas generadas dinámicamente -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Modal para crear/editar propietario -->
+  <div id="modalPropietario" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModal">Nuevo propietario</h3>
+      <form id="formPropietario">
+        <input type="hidden" id="idPropietario">
+
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" required>
+
+        <label for="identificacion">Identificación</label>
+        <input type="text" id="identificacion">
+
+        <label for="telefono">Teléfono</label>
+        <input type="text" id="telefono">
+
+        <label for="correo">Correo</label>
+        <input type="email" id="correo">
+
+        <label for="direccion">Dirección</label>
+        <input type="text" id="direccion">
+
+        <p id="mensajeErrorModal" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarModal" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script src="js/common.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/propietarios.js"></script>
+</body>
+</html>
