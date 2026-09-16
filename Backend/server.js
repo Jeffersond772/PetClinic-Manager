@@ -38,6 +38,7 @@ app.use('/api/historias', require('./routes/historias.routes'));
 app.use('/api/cuentas', require('./routes/cuentas.routes'));
 app.use('/api/gastos', require('./routes/gastos.routes'));
 app.use('/api/servicios', require('./routes/servicios.routes'));
+app.use('/api/reportes', require('./routes/reportes.routes'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

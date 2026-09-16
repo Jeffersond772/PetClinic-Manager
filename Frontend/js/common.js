@@ -26,15 +26,16 @@ const menusPorRol = {
     { texto: 'Propietarios', href: 'propietarios.html' },
     { texto: 'Pacientes', href: 'pacientes.html' },
     { texto: 'Inventario', href: 'productos.html' },
+    { texto: 'Servicios', href: 'servicios.html' },
     { texto: 'Citas', href: 'citas.html' },
     { texto: 'Pagos y facturación', href: 'cuentas.html' },
 { texto: 'Gastos', href: 'gastos.html' },  // solo en el menú de Administrador
     { texto: 'Reportes', href: '#' }
+    
   ],
   Veterinario: [
     { texto: 'Pacientes', href: 'pacientes.html' },
     { texto: 'Citas', href: 'citas.html' },
-    { texto: 'Consultas', href: '#' }
   ],
   Empleado: [
     { texto: 'Propietarios', href: 'propietarios.html' },

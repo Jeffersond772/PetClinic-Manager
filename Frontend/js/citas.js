@@ -16,9 +16,11 @@ const selectVeterinario = document.getElementById('veterinario');
 
 // ---- Utilidad: formatear fecha a YYYY-MM-DD ----
 function formatearFecha(fecha) {
-  return fecha.toISOString().split('T')[0];
+  const año = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${año}-${mes}-${dia}`;
 }
-
 // ---- Cargar veterinarios en los selects (filtro y modal) ----
 async function cargarVeterinarios() {
   const respuesta = await fetch(`${API_URL}/api/catalogos/veterinarios`, {
