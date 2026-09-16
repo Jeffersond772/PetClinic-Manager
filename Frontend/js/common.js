@@ -30,8 +30,7 @@ const menusPorRol = {
     { texto: 'Citas', href: 'citas.html' },
     { texto: 'Pagos y facturación', href: 'cuentas.html' },
 { texto: 'Gastos', href: 'gastos.html' },  // solo en el menú de Administrador
-    { texto: 'Reportes', href: '#' }
-    
+    { texto: 'Reportes', href: 'reportes.html' }
   ],
   Veterinario: [
     { texto: 'Pacientes', href: 'pacientes.html' },

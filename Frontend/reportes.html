@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Reportes</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Reportes</h2>
+      </div>
+
+      <div class="filtros-agenda">
+        <div>
+          <label for="filtroDesde">Desde</label>
+          <input type="date" id="filtroDesde">
+        </div>
+        <div>
+          <label for="filtroHasta">Hasta</label>
+          <input type="date" id="filtroHasta">
+        </div>
+        <div class="filtro-botones">
+          <button id="btnMesActual" class="btn-secundario">Este mes</button>
+          <button id="btnUltimos30" class="btn-secundario">Últimos 30 días</button>
+        </div>
+      </div>
+
+      <div class="tarjetas-resumen" id="tarjetasResumen"></div>
+
+      <div class="grid-graficos">
+        <div class="tarjeta-grafico">
+          <h3>Ingresos vs Gastos</h3>
+          <canvas id="graficoFinanciero"></canvas>
+        </div>
+        <div class="tarjeta-grafico">
+          <h3>Consultas por día</h3>
+          <canvas id="graficoConsultas"></canvas>
+        </div>
+        <div class="tarjeta-grafico">
+          <h3>Productos con más movimiento</h3>
+          <canvas id="graficoProductos"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/reportes.js"></script>
+</body>
+</html>
