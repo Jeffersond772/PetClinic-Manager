@@ -74,18 +74,31 @@ async function productosMayorMovimiento(desde, hasta) {
 
 // CU21 + dashboard: resumen general de un período, todo en paralelo
 async function resumenGeneral(desde, hasta) {
-  const [[ingresos], [gastos], [citasAtendidas], [bajoStock], [deudas]] = await Promise.all([
+  const [[ingresos], [gastos], [citasAtendidas], [bajoStock], [deudas], [costoMercancia]] = await Promise.all([
     db.query(`SELECT COALESCE(SUM(monto), 0) AS total FROM pagos WHERE DATE(fecha) BETWEEN ? AND ?`, [desde, hasta]),
     db.query(`SELECT COALESCE(SUM(monto), 0) AS total FROM gastos WHERE fecha BETWEEN ? AND ?`, [desde, hasta]),
     db.query(`SELECT COUNT(*) AS total FROM citas WHERE estado = 'atendida' AND fecha BETWEEN ? AND ?`, [desde, hasta]),
     db.query(`SELECT COUNT(*) AS total FROM productos WHERE cantidad_disponible <= stock_minimo AND estado = 'activo'`),
-    db.query(`SELECT COALESCE(SUM(total), 0) AS total FROM cuentas WHERE estado IN ('pendiente', 'parcial')`)
+    db.query(`SELECT COALESCE(SUM(total), 0) AS total FROM cuentas WHERE estado IN ('pendiente', 'parcial')`),
+    // Costo de mercancía vendida (COGS): solo ítems tipo producto, con el costo congelado al momento de la venta
+    db.query(
+      `SELECT COALESCE(SUM(dc.cantidad * dc.costo_unitario), 0) AS total
+       FROM detalle_cuenta dc
+       JOIN cuentas c ON c.id_cuenta = dc.id_cuenta
+       WHERE dc.tipo = 'producto' AND DATE(c.fecha) BETWEEN ? AND ?`,
+      [desde, hasta]
+    )
   ]);
 
+  const totalIngresos = Number(ingresos[0].total);
+  const totalCostoMercancia = Number(costoMercancia[0].total);
+
   return {
-    ingresos: Number(ingresos[0].total),
+    ingresos: totalIngresos,
     gastos: Number(gastos[0].total),
-    saldo: Number(ingresos[0].total) - Number(gastos[0].total),
+    saldo: totalIngresos - Number(gastos[0].total),
+    costoMercancia: totalCostoMercancia,
+    utilidadBruta: totalIngresos - totalCostoMercancia,
     citasAtendidas: citasAtendidas[0].total,
     productosBajoStock: bajoStock[0].total,
     deudasPendientes: Number(deudas[0].total)

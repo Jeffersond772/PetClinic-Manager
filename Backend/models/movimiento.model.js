@@ -7,9 +7,9 @@ async function registrarEntrada({ id_producto, cantidad, costo_unitario, motivo,
   try {
     await conexion.beginTransaction();
 
-    // Verificamos que el producto exista (flujo alternativo CU06)
+        // Verificamos que el producto exista (flujo alternativo CU06)
     const [productos] = await conexion.query(
-      `SELECT id_producto FROM productos WHERE id_producto = ? AND estado = 'activo'`,
+      `SELECT cantidad_disponible, costo_promedio FROM productos WHERE id_producto = ? AND estado = 'activo' FOR UPDATE`,
       [id_producto]
     );
     if (productos.length === 0) {
@@ -18,15 +18,25 @@ async function registrarEntrada({ id_producto, cantidad, costo_unitario, motivo,
       throw error;
     }
 
+    // Costo promedio ponderado: combina lo que ya tenías con lo que acabas de comprar
+    const cantidadPrevia = Number(productos[0].cantidad_disponible);
+    const costoPrevio = Number(productos[0].costo_promedio);
+    const cantidadEntrada = Number(cantidad);
+    const costoEntrada = Number(costo_unitario || 0);
+
+    const nuevoCostoPromedio = (cantidadPrevia + cantidadEntrada) > 0
+      ? ((cantidadPrevia * costoPrevio) + (cantidadEntrada * costoEntrada)) / (cantidadPrevia + cantidadEntrada)
+      : costoEntrada;
+
     const [resultado] = await conexion.query(
       `INSERT INTO movimientos_inventario (id_producto, tipo, motivo, cantidad, costo_unitario, id_usuario, id_compra)
        VALUES (?, 'entrada', ?, ?, ?, ?, ?)`,
       [id_producto, motivo || 'compra', cantidad, costo_unitario || 0, id_usuario, id_compra || null]
     );
 
-    await conexion.query(
-      `UPDATE productos SET cantidad_disponible = cantidad_disponible + ? WHERE id_producto = ?`,
-      [cantidad, id_producto]
+        await conexion.query(
+      `UPDATE productos SET cantidad_disponible = cantidad_disponible + ?, costo_promedio = ? WHERE id_producto = ?`,
+      [cantidad, nuevoCostoPromedio.toFixed(2), id_producto]
     );
 
     await conexion.commit();
