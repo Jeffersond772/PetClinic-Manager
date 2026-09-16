@@ -33,6 +33,11 @@ app.use('/api/catalogos', require('./routes/catalogos.routes'));
 app.use('/api/productos', require('./routes/productos.routes'));
 app.use('/api/movimientos', require('./routes/movimientos.routes'));
 app.use('/api/citas', require('./routes/citas.routes'));
+app.use('/api/consultas', require('./routes/consultas.routes'));
+app.use('/api/historias', require('./routes/historias.routes'));
+app.use('/api/cuentas', require('./routes/cuentas.routes'));
+app.use('/api/gastos', require('./routes/gastos.routes'));
+app.use('/api/servicios', require('./routes/servicios.routes'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

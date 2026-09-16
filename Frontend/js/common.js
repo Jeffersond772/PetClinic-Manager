@@ -27,12 +27,12 @@ const menusPorRol = {
     { texto: 'Pacientes', href: 'pacientes.html' },
     { texto: 'Inventario', href: 'productos.html' },
     { texto: 'Citas', href: 'citas.html' },
-    { texto: 'Pagos y gastos', href: '#' },
+    { texto: 'Pagos y facturación', href: 'cuentas.html' },
+{ texto: 'Gastos', href: 'gastos.html' },  // solo en el menú de Administrador
     { texto: 'Reportes', href: '#' }
   ],
   Veterinario: [
     { texto: 'Pacientes', href: 'pacientes.html' },
-    { texto: 'Historias clínicas', href: '#' },
     { texto: 'Citas', href: 'citas.html' },
     { texto: 'Consultas', href: '#' }
   ],
@@ -40,7 +40,7 @@ const menusPorRol = {
     { texto: 'Propietarios', href: 'propietarios.html' },
     { texto: 'Pacientes', href: 'pacientes.html' },
     { texto: 'Citas', href: 'citas.html' },
-    { texto: 'Pagos', href: '#' }
+    { texto: 'Pagos y facturación', href: 'cuentas.html' }
   ]
 };
 

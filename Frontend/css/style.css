@@ -467,3 +467,180 @@ button:hover {
 .badge-atendida { background: #e2f5ea; color: #1d9e75; }
 .badge-cancelada { background: #fdecea; color: #a83226; }
 .badge-no_asistio { background: #f0f0f0; color: #777; }
+
+/* ---- Ficha del paciente ---- */
+.ficha-paciente {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.ficha-paciente h2 {
+  color: #1d1d1d;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.ficha-paciente .subinfo {
+  color: #777;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.ficha-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  font-size: 13px;
+}
+
+.ficha-datos span {
+  color: #999;
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.titulo-seccion-secundaria {
+  margin: 28px 0 14px;
+  font-size: 17px;
+  color: #333;
+}
+
+/* ---- Lista de consultas (tarjetas) ---- */
+.lista-consultas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tarjeta-consulta {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.tarjeta-consulta .encabezado-consulta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #777;
+}
+
+.tarjeta-consulta h4 {
+  font-size: 15px;
+  color: #1d1d1d;
+  margin-bottom: 6px;
+}
+
+.tarjeta-consulta p {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 4px;
+}
+
+.tarjeta-consulta .etiqueta {
+  color: #999;
+  font-weight: 600;
+}
+
+.lista-tratamientos-mostrar {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #eee;
+}
+
+.lista-tratamientos-mostrar li {
+  font-size: 13px;
+  color: #444;
+  margin-left: 18px;
+}
+
+/* ---- Modal grande (consulta) ---- */
+.modal-grande {
+  max-width: 560px;
+}
+
+/* ---- Formulario dinámico de tratamientos ---- */
+.separador-tratamientos {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.encabezado-tratamientos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.encabezado-tratamientos label {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.fila-tratamiento {
+  display: grid;
+  grid-template-columns: 1fr 90px 30px;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.fila-tratamiento select,
+.fila-tratamiento input {
+  padding: 8px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.btn-quitar-tratamiento {
+  background: #fdecea;
+  color: #a83226;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.total-preview {
+  text-align: right;
+  font-size: 15px;
+  margin-top: 16px;
+  color: #333;
+}
+
+.badge-pagada { background: #e2f5ea; color: #1d9e75; }
+.badge-parcial { background: #fff6e0; color: #93690a; }
+.badge-pendiente { background: #fdecea; color: #a83226; }
+
+.detalle-cuenta-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detalle-cuenta-resumen {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.detalle-cuenta-resumen p {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Pagos y facturación</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Pagos y facturación</h2>
+        <button id="btnNuevaCuenta" class="btn-primario">Nueva cuenta</button>
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Propietario</th>
+            <th>Total</th>
+            <th>Pagado</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaCuentas"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Modal: Nueva cuenta -->
+  <div id="modalCuenta" class="modal-overlay oculto">
+    <div class="modal-caja modal-grande">
+      <h3>Nueva cuenta</h3>
+      <form id="formCuenta">
+        <label for="propietarioTexto">Propietario</label>
+        <input type="text" id="propietarioTexto" placeholder="Escribe para buscar..." autocomplete="off">
+        <div id="resultadosPropietario" class="resultados-autocompletar"></div>
+        <input type="hidden" id="idPropietarioSeleccionado">
+
+        <div class="separador-tratamientos">
+          <div class="encabezado-tratamientos">
+            <label>Productos y servicios</label>
+            <div>
+              <button type="button" id="btnAgregarProducto" class="btn-icono">+ Producto</button>
+              <button type="button" id="btnAgregarServicio" class="btn-icono">+ Servicio</button>
+            </div>
+          </div>
+          <div id="listaItemsForm"></div>
+        </div>
+
+        <p class="total-preview">Total estimado: <strong id="totalEstimado">$0</strong></p>
+        <p id="mensajeErrorCuenta" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarCuenta" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Crear cuenta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ver cuenta / registrar pago -->
+  <div id="modalDetalleCuenta" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3>Detalle de cuenta</h3>
+      <div id="contenidoDetalleCuenta"></div>
+
+      <form id="formPago">
+        <input type="hidden" id="idCuentaPago">
+        <label for="montoPago">Registrar pago</label>
+        <input type="number" step="0.01" id="montoPago" placeholder="Monto" required>
+
+        <label for="metodoPago">Método de pago</label>
+        <select id="metodoPago" required>
+          <option value="efectivo">Efectivo</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="otro">Otro</option>
+        </select>
+
+        <p id="mensajeErrorPago" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCerrarDetalleCuenta" class="btn-secundario">Cerrar</button>
+          <button type="submit" class="btn-primario">Registrar pago</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/cuentas.js"></script>
+</body>
+</html>

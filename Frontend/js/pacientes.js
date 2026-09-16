@@ -84,7 +84,8 @@ function pintarTabla(lista) {
       <td>${p.especie}</td>
       <td>${p.raza || '-'}</td>
       <td>${p.propietario || '-'}</td>
-      <td><button class="btn-icono" onclick="editarPaciente(${p.id_paciente})">Editar</button></td>
+      <td><button class="btn-icono" onclick="window.location.href='historia.html?id_paciente=${p.id_paciente}'">Ver historia</button>
+<button class="btn-icono" onclick="editarPaciente(${p.id_paciente})">Editar</button></td>
     </tr>
   `).join('');
 }
