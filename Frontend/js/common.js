@@ -22,7 +22,7 @@ if (elRolUsuario) elRolUsuario.textContent = usuario.rol;
 // ---- Menú lateral según el rol (CU22) ----
 const menusPorRol = {
   Administrador: [
-    { texto: 'Usuarios', href: '#' },
+    { texto: 'Usuarios', href: 'usuarios.html' },
     { texto: 'Propietarios', href: 'propietarios.html' },
     { texto: 'Pacientes', href: 'pacientes.html' },
     { texto: 'Inventario', href: 'productos.html' },
@@ -61,3 +61,20 @@ if (elBtnLogout) {
     window.location.href = 'index.html';
   });
 }
+
+// ---- Modo oscuro ----
+const modoGuardado = localStorage.getItem('modoOscuro');
+if (modoGuardado === '1') {
+  document.body.classList.add('modo-oscuro');
+}
+
+const btnModo = document.createElement('button');
+btnModo.id = 'btnModoOscuro';
+btnModo.textContent = document.body.classList.contains('modo-oscuro') ? 'Modo claro' : 'Modo oscuro';
+btnModo.addEventListener('click', () => {
+  document.body.classList.toggle('modo-oscuro');
+  const activo = document.body.classList.contains('modo-oscuro');
+  localStorage.setItem('modoOscuro', activo ? '1' : '0');
+  btnModo.textContent = activo ? 'Modo claro' : 'Modo oscuro';
+});
+document.body.appendChild(btnModo);

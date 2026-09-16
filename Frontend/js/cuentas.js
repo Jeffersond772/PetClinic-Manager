@@ -246,7 +246,10 @@ async function verDetalle(id_cuenta) {
   mensajeErrorPago.textContent = '';
 
   // Si ya está pagada, ocultamos el formulario de pago
-  formPago.style.display = cuenta.estado === 'pagada' ? 'none' : 'flex';
+    // Si ya está pagada, ocultamos SOLO los campos de pago, nunca el botón de cerrar
+  const pagada = cuenta.estado === 'pagada';
+  document.getElementById('camposPago').style.display = pagada ? 'none' : 'block';
+  document.getElementById('btnRegistrarPago').style.display = pagada ? 'none' : 'inline-block';
 
   modalDetalleCuenta.classList.remove('oculto');
 }

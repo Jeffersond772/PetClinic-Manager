@@ -715,3 +715,80 @@ button:hover {
     transform: translateY(0);
   }
 }
+
+/* ---- Botón flotante de modo oscuro ---- */
+#btnModoOscuro {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1d1d1d;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 200;
+  transition: transform 0.15s;
+}
+
+#btnModoOscuro:hover {
+  transform: scale(1.05);
+}
+
+/* ---- Modo oscuro ---- */
+body.modo-oscuro { background: #16181c; }
+body.modo-oscuro .dashboard-body { background: #16181c; }
+body.modo-oscuro .topbar,
+body.modo-oscuro .sidebar,
+body.modo-oscuro .tabla-datos,
+body.modo-oscuro .modal-caja,
+body.modo-oscuro .tarjeta-kpi,
+body.modo-oscuro .tarjeta-grafico,
+body.modo-oscuro .filtros-agenda,
+body.modo-oscuro .ficha-paciente,
+body.modo-oscuro .tarjeta-consulta,
+body.modo-oscuro .login-container {
+  background: #23262b;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+body.modo-oscuro .topbar h1,
+body.modo-oscuro .contenido h2,
+body.modo-oscuro .ficha-paciente h2,
+body.modo-oscuro .tarjeta-consulta h4,
+body.modo-oscuro .modal-caja h3,
+body.modo-oscuro .tabla-datos td,
+body.modo-oscuro .login-container h1 {
+  color: #eaeaea;
+}
+
+body.modo-oscuro .sidebar a { color: #bbb; }
+body.modo-oscuro .sidebar a:hover { background: #2d3138; color: #3ecf99; }
+
+body.modo-oscuro .tabla-datos th { background: #2a2d33; color: #999; }
+body.modo-oscuro .tabla-datos tbody tr:hover { background-color: #282b31; }
+body.modo-oscuro .tabla-datos td { border-top: 1px solid #303338; }
+
+body.modo-oscuro input,
+body.modo-oscuro select,
+body.modo-oscuro textarea {
+  background: #1c1e22;
+  border-color: #3a3d42;
+  color: #eaeaea;
+}
+
+body.modo-oscuro label,
+body.modo-oscuro .subtitulo,
+body.modo-oscuro .texto-secundario,
+body.modo-oscuro .encabezado-consulta {
+  color: #999;
+}
+
+body.modo-oscuro .btn-secundario {
+  background: #2d3138;
+  color: #ddd;
+}
+body.modo-oscuro .btn-secundario:hover { background: #383c44; }

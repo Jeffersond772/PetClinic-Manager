@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PetClinic Manager - Panel</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 </head>
 <body class="dashboard-body">
 
@@ -23,9 +24,22 @@
     </nav>
 
     <main class="contenido">
-      <h2 id="saludo">Bienvenido</h2>
-      <p>Selecciona una opción del menú para comenzar.</p>
-    </main>
+  <h2 id="saludo">Bienvenido</h2>
+  <p class="texto-secundario" id="fechaHoy"></p>
+
+  <div class="tarjetas-resumen" id="tarjetasResumenDashboard"></div>
+
+  <div class="grid-graficos">
+    <div class="tarjeta-grafico">
+      <h3>Ingresos vs Gastos (este mes)</h3>
+      <canvas id="graficoFinancieroDashboard"></canvas>
+    </div>
+    <div class="tarjeta-grafico">
+      <h3>Consultas por día (este mes)</h3>
+      <canvas id="graficoConsultasDashboard"></canvas>
+    </div>
+  </div>
+</main>
   </div>
   <script src="js/common.js"></script>
   <script src="js/dashboard.js"></script>

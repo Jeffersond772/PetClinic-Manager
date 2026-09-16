@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Usuarios</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Usuarios</h2>
+        <button id="btnNuevoUsuario" class="btn-primario">Nuevo usuario</button>
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaUsuarios"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <div id="modalUsuario" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModalUsuario">Nuevo usuario</h3>
+      <form id="formUsuario">
+        <input type="hidden" id="idUsuario">
+
+        <label for="nombreUsuarioInput">Nombre completo</label>
+        <input type="text" id="nombreUsuarioInput" required>
+
+        <label for="correoUsuario">Correo</label>
+        <input type="email" id="correoUsuario" required>
+
+        <label for="telefonoUsuario">Teléfono</label>
+        <input type="text" id="telefonoUsuario">
+
+        <label for="rolUsuarioSelect">Rol</label>
+        <select id="rolUsuarioSelect" required>
+          <option value="">Selecciona un rol</option>
+        </select>
+
+        <div id="grupoPassword">
+          <label for="passwordUsuario">Contraseña</label>
+          <input type="password" id="passwordUsuario">
+        </div>
+
+        <p id="mensajeErrorUsuario" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarUsuario" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/usuarios.js"></script>
+</body>
+</html>
