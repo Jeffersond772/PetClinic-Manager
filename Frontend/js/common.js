@@ -54,12 +54,77 @@ if (elSidebar) {
   });
 }
 
+// ---- Resaltar la página activa en el menú ----
+if (elSidebar) {
+  const paginaActual = window.location.pathname.split('/').pop();
+  elSidebar.querySelectorAll('a').forEach(link => {
+    if (link.getAttribute('href') === paginaActual) {
+      link.classList.add('activo');
+    }
+  });
+}
+
+// ---- Favicon (se inyecta en todas las páginas sin tocar cada HTML) ----
+const favicon = document.createElement('link');
+favicon.rel = 'icon';
+favicon.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%231d9e75"/></svg>';
+document.head.appendChild(favicon);
+
 if (elBtnLogout) {
   elBtnLogout.addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
     window.location.href = 'index.html';
   });
+}
+
+// ---- Modal de confirmación/alerta reutilizable ----
+const modalConfirmHTML = `
+  <div id="modalConfirmGlobal" class="modal-overlay oculto">
+    <div class="modal-caja modal-confirm">
+      <p id="mensajeConfirmGlobal"></p>
+      <div class="modal-botones" id="botonesConfirmGlobal"></div>
+    </div>
+  </div>
+`;
+document.body.insertAdjacentHTML('beforeend', modalConfirmHTML);
+
+const modalConfirmGlobal = document.getElementById('modalConfirmGlobal');
+const mensajeConfirmGlobal = document.getElementById('mensajeConfirmGlobal');
+const botonesConfirmGlobal = document.getElementById('botonesConfirmGlobal');
+
+// Reemplaza confirm() nativo. Uso: const ok = await confirmarAccion('¿Seguro?');
+function confirmarAccion(mensaje) {
+  return new Promise(resolve => {
+    mensajeConfirmGlobal.textContent = mensaje;
+    botonesConfirmGlobal.innerHTML = `
+      <button type="button" class="btn-secundario" id="btnConfirmNo">Cancelar</button>
+      <button type="button" class="btn-primario" id="btnConfirmSi">Confirmar</button>
+    `;
+    modalConfirmGlobal.classList.remove('oculto');
+
+    document.getElementById('btnConfirmSi').onclick = () => {
+      modalConfirmGlobal.classList.add('oculto');
+      resolve(true);
+    };
+    document.getElementById('btnConfirmNo').onclick = () => {
+      modalConfirmGlobal.classList.add('oculto');
+      resolve(false);
+    };
+  });
+}
+
+// Reemplaza alert() nativo. Uso: mostrarAlerta('Algo pasó');
+function mostrarAlerta(mensaje) {
+  mensajeConfirmGlobal.textContent = mensaje;
+  botonesConfirmGlobal.innerHTML = `<button type="button" class="btn-primario" id="btnAlertaOk">Entendido</button>`;
+  modalConfirmGlobal.classList.remove('oculto');
+  document.getElementById('btnAlertaOk').onclick = () => modalConfirmGlobal.classList.add('oculto');
+}
+
+// Muestra una fila de "cargando" con spinner mientras llega la respuesta del servidor
+function mostrarCargando(elementoTbody, columnas) {
+  elementoTbody.innerHTML = `<tr><td colspan="${columnas}" class="tabla-cargando"><span class="spinner"></span> Cargando...</td></tr>`;
 }
 
 // ---- Modo oscuro ----

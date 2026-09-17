@@ -31,6 +31,7 @@ async function cargarCatalogos() {
 }
 
 async function cargarCuentas() {
+  mostrarCargando(tablaCuentas, 6);
   try {
     const respuesta = await fetch(`${API_URL}/api/cuentas`, {
       headers: { 'Authorization': `Bearer ${token}` }

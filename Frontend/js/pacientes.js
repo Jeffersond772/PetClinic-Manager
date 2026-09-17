@@ -47,6 +47,7 @@ inputEspecie.addEventListener('change', () => cargarRazas(inputEspecie.value));
 
 // ---- Cargar y pintar la tabla de pacientes ----
 async function cargarPacientes() {
+  mostrarCargando(tablaPacientes, 5);
   try {
     let url = `${API_URL}/api/pacientes`;
     if (idPropietarioFiltro) {

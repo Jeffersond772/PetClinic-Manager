@@ -7,6 +7,7 @@ const mensajeErrorServicio = document.getElementById('mensajeErrorServicio');
 let servicios = [];
 
 async function cargarServicios() {
+  mostrarCargando(tablaServicios, 4);
   try {
     const respuesta = await fetch(`${API_URL}/api/servicios`, {
       headers: { 'Authorization': `Bearer ${token}` }

@@ -9,6 +9,7 @@ let propietarios = []; // caché local de la última lista cargada
 
 // ---- Cargar y pintar la tabla ----
 async function cargarPropietarios() {
+  mostrarCargando(tablaPropietarios, 6);
   try {
     const respuesta = await fetch(`${API_URL}/api/propietarios`, {
       headers: { 'Authorization': `Bearer ${token}` }

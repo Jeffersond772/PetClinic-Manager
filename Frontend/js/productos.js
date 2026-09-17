@@ -55,6 +55,7 @@ async function cargarAlertas() {
 
 // ---- Cargar y pintar tabla de productos ----
 async function cargarProductos() {
+  mostrarCargando(tablaProductos, 6);
   try {
     const respuesta = await fetch(`${API_URL}/api/productos`, {
       headers: { 'Authorization': `Bearer ${token}` }

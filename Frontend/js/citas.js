@@ -38,6 +38,7 @@ async function cargarAgenda() {
   const desde = filtroDesde.value;
   const hasta = filtroHasta.value;
   const idVet = filtroVeterinario.value;
+  mostrarCargando(tablaCitas, 7);
 
   let url = `${API_URL}/api/citas/agenda?desde=${desde}&hasta=${hasta}`;
   if (idVet) url += `&id_veterinario=${idVet}`;
@@ -254,7 +255,8 @@ formCita.addEventListener('submit', async (e) => {
 // ==================== ACCIONES RÁPIDAS ====================
 
 async function cancelarCita(id_cita) {
-  if (!confirm('¿Confirmas que deseas cancelar esta cita?')) return;
+  const ok = await confirmarAccion('¿Confirmas que deseas cancelar esta cita?');
+  if (!ok) return;
 
   await fetch(`${API_URL}/api/citas/${id_cita}/cancelar`, {
     method: 'PATCH',

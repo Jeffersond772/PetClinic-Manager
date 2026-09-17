@@ -4,6 +4,7 @@ const formGasto = document.getElementById('formGasto');
 const mensajeErrorGasto = document.getElementById('mensajeErrorGasto');
 
 async function cargarGastos() {
+  mostrarCargando(tablaGastos, 5);
   try {
     const respuesta = await fetch(`${API_URL}/api/gastos`, {
       headers: { 'Authorization': `Bearer ${token}` }

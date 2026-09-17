@@ -19,6 +19,7 @@ async function cargarRoles() {
 }
 
 async function cargarUsuarios() {
+  mostrarCargando(tablaUsuarios, 5);
   try {
     const respuesta = await fetch(`${API_URL}/api/usuarios`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -141,7 +142,8 @@ formUsuario.addEventListener('submit', async (e) => {
 
 async function cambiarEstadoUsuario(id_usuario, nuevoEstado) {
   const accion = nuevoEstado === 'inactivo' ? 'desactivar' : 'activar';
-  if (!confirm(`¿Confirmas que deseas ${accion} este usuario?`)) return;
+  const ok = await confirmarAccion(`¿Confirmas que deseas ${accion} este usuario?`);
+  if (!ok) return;
 
   const respuesta = await fetch(`${API_URL}/api/usuarios/${id_usuario}/estado`, {
     method: 'PATCH',
@@ -151,7 +153,7 @@ async function cambiarEstadoUsuario(id_usuario, nuevoEstado) {
 
   if (!respuesta.ok) {
     const resultado = await respuesta.json();
-    alert(resultado.mensaje || 'Ocurrió un error');
+    mostrarAlerta(resultado.mensaje || 'Ocurrió un error');
     return;
   }
 

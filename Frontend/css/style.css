@@ -21,6 +21,8 @@ body {
   width: 100%;
   max-width: 380px;
   text-align: center;
+    opacity: 0;
+  animation: aparecer 0.5s ease forwards;
 }
 
 .login-container h1 {
@@ -295,10 +297,22 @@ button:hover {
   align-items: center;
   justify-content: center;
   z-index: 100;
+  opacity: 1;
+  transition: opacity 0.2s ease;
 }
 
 .modal-overlay.oculto {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-overlay .modal-caja {
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+.modal-overlay.oculto .modal-caja {
+  transform: scale(0.95);
 }
 
 .modal-caja {
@@ -797,3 +811,93 @@ body.modo-oscuro .btn-secundario:hover { background: #383c44; }
   color: #1d9e75;
   font-weight: 600;
 }
+
+/* ---- Scrollbar personalizado ---- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+body.modo-oscuro ::-webkit-scrollbar-thumb { background: #3a3d42; }
+body.modo-oscuro ::-webkit-scrollbar-thumb:hover { background: #4a4d52; }
+
+/* ---- Menú activo ---- */
+.sidebar a.activo {
+  background: #e8f4f0;
+  color: #1d9e75;
+  font-weight: 600;
+  border-left: 3px solid #1d9e75;
+}
+
+/* ---- Spinner de carga ---- */
+.tabla-cargando {
+  text-align: center;
+  color: #999;
+  padding: 30px !important;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ddd;
+  border-top-color: #1d9e75;
+  border-radius: 50%;
+  animation: girar 0.6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Modal de confirmación ---- */
+.modal-confirm {
+  max-width: 360px;
+  text-align: center;
+}
+
+.modal-confirm p {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.modal-confirm .modal-botones {
+  justify-content: center;
+}
+
+/* ---- Modo oscuro: elementos de historia.html y cuentas.html ---- */
+body.modo-oscuro .resultados-autocompletar {
+  background: #1c1e22;
+  border-color: #3a3d42;
+}
+body.modo-oscuro .resultado-item {
+  border-bottom-color: #303338;
+  color: #ddd;
+}
+body.modo-oscuro .resultado-item:hover { background: #2d3138; }
+body.modo-oscuro .resultado-item small { color: #888; }
+
+body.modo-oscuro .fila-tratamiento select,
+body.modo-oscuro .fila-tratamiento input {
+  background: #1c1e22;
+  border-color: #3a3d42;
+  color: #eaeaea;
+}
+
+body.modo-oscuro .lista-tratamientos-mostrar { border-top-color: #303338; }
+body.modo-oscuro .lista-tratamientos-mostrar li { color: #ccc; }
+
+body.modo-oscuro .ficha-datos span { color: #888; }
+body.modo-oscuro .ficha-datos { color: #ddd; }
+body.modo-oscuro .titulo-seccion-secundaria { color: #eaeaea; }
+body.modo-oscuro .tarjeta-consulta p { color: #ccc; }
+body.modo-oscuro .etiqueta { color: #999; }
+
+body.modo-oscuro .total-preview { color: #eaeaea; }
+body.modo-oscuro .detalle-cuenta-item { border-bottom-color: #303338; color: #ddd; }
+body.modo-oscuro .detalle-cuenta-resumen { border-top-color: #3a3d42; color: #eaeaea; }
+
+body.modo-oscuro .modal-confirm p { color: #eaeaea; }
