@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PetClinic Manager - Pagos y facturación</title>
+  <title>PetClinic Manager - Ventas</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="dashboard-body">
@@ -22,7 +22,7 @@
 
     <main class="contenido">
       <div class="encabezado-seccion">
-        <h2>Pagos y facturación</h2>
+                <h2>Ventas</h2>
         <button id="btnNuevaCuenta" class="btn-primario">Nueva cuenta</button>
       </div>
 
@@ -80,24 +80,27 @@
       <h3>Detalle de cuenta</h3>
       <div id="contenidoDetalleCuenta"></div>
 
-      <form id="formPago">
+            <form id="formPago">
         <input type="hidden" id="idCuentaPago">
-        <label for="montoPago">Registrar pago</label>
-        <input type="number" step="0.01" id="montoPago" placeholder="Monto" required>
+        <div id="camposPago">
+          <label for="montoPago">Registrar pago</label>
+          <input type="number" step="0.01" id="montoPago" placeholder="Monto" required>
 
-        <label for="metodoPago">Método de pago</label>
-        <select id="metodoPago" required>
-          <option value="efectivo">Efectivo</option>
-          <option value="transferencia">Transferencia</option>
-          <option value="tarjeta">Tarjeta</option>
-          <option value="otro">Otro</option>
-        </select>
+          <label for="metodoPago">Método de pago</label>
+          <select id="metodoPago" required>
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
 
         <p id="mensajeErrorPago" class="error-mensaje"></p>
 
         <div class="modal-botones">
+          <button type="button" id="btnImprimirFactura" class="btn-secundario">Ver factura</button>
           <button type="button" id="btnCerrarDetalleCuenta" class="btn-secundario">Cerrar</button>
-          <button type="submit" class="btn-primario">Registrar pago</button>
+          <button type="submit" id="btnRegistrarPago" class="btn-primario">Registrar pago</button>
         </div>
       </form>
     </div>

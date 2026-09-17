@@ -50,21 +50,25 @@ function pintarTarjetas(r) {
     </div>
     <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.05s">
       <div class="valor-kpi">$${r.gastos.toLocaleString()}</div>
-      <div class="etiqueta-kpi">Gastos</div>
+      <div class="etiqueta-kpi">Gastos operativos</div>
     </div>
-    <div class="tarjeta-kpi ${r.saldo >= 0 ? 'acento-verde' : 'acento-rojo'}" style="animation-delay:0.1s">
-      <div class="valor-kpi">$${r.saldo.toLocaleString()}</div>
-      <div class="etiqueta-kpi">Saldo</div>
+    <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.1s">
+      <div class="valor-kpi">$${r.costoMercancia.toLocaleString()}</div>
+      <div class="etiqueta-kpi">Costo de mercancía</div>
     </div>
-    <div class="tarjeta-kpi acento-azul" style="animation-delay:0.15s">
+    <div class="tarjeta-kpi ${r.utilidadBruta >= 0 ? 'acento-verde' : 'acento-rojo'}" style="animation-delay:0.15s">
+      <div class="valor-kpi">$${r.utilidadBruta.toLocaleString()}</div>
+      <div class="etiqueta-kpi">Utilidad bruta</div>
+    </div>
+    <div class="tarjeta-kpi acento-azul" style="animation-delay:0.2s">
       <div class="valor-kpi">${r.citasAtendidas}</div>
       <div class="etiqueta-kpi">Citas atendidas</div>
     </div>
-    <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.2s">
+    <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.25s">
       <div class="valor-kpi">${r.productosBajoStock}</div>
       <div class="etiqueta-kpi">Productos bajo stock</div>
     </div>
-    <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.25s">
+    <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.3s">
       <div class="valor-kpi">$${r.deudasPendientes.toLocaleString()}</div>
       <div class="etiqueta-kpi">Deudas pendientes</div>
     </div>

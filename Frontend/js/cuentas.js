@@ -217,11 +217,14 @@ formCuenta.addEventListener('submit', async (e) => {
 
 // ==================== MODAL: DETALLE / PAGO ====================
 
+let cuentaActual = null;
+
 async function verDetalle(id_cuenta) {
   const respuesta = await fetch(`${API_URL}/api/cuentas/${id_cuenta}`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const cuenta = await respuesta.json();
+  cuentaActual = cuenta;
 
   const totalPagado = cuenta.pagos.reduce((suma, p) => suma + Number(p.monto), 0);
   const saldo = Number(cuenta.total) - totalPagado;
@@ -230,7 +233,7 @@ async function verDetalle(id_cuenta) {
     <p class="texto-secundario">Propietario: ${cuenta.propietario} · ${cuenta.fecha.split('T')[0]}</p>
     ${cuenta.detalle.map(d => `
       <div class="detalle-cuenta-item">
-        <span>${d.producto || d.servicio} (x${d.cantidad})</span>
+        <span>${d.producto || d.servicio} (x${d.cantidad})${d.margen_porcentaje !== null ? ` <small class="margen-tag">margen ${d.margen_porcentaje}%</small>` : ''}</span>
         <span>$${Number(d.subtotal).toLocaleString()}</span>
       </div>
     `).join('')}
@@ -288,6 +291,120 @@ formPago.addEventListener('submit', async (e) => {
     mensajeErrorPago.textContent = 'No se pudo conectar con el servidor';
   }
 });
+
+document.getElementById('btnImprimirFactura').addEventListener('click', () => {
+  if (!cuentaActual) return;
+  abrirFacturaImprimible(cuentaActual);
+});
+
+function abrirFacturaImprimible(cuenta) {
+  const totalPagado = cuenta.pagos.reduce((suma, p) => suma + Number(p.monto), 0);
+  const saldo = Number(cuenta.total) - totalPagado;
+  const fecha = new Date(cuenta.fecha);
+  const fechaFormateada = fecha.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const filasItems = cuenta.detalle.map(d => `
+    <tr>
+      <td>${d.producto || d.servicio}</td>
+      <td style="text-align:center;">${d.cantidad}</td>
+      <td style="text-align:right;">$${Number(d.precio_unitario).toLocaleString()}</td>
+      <td style="text-align:right;">$${Number(d.subtotal).toLocaleString()}</td>
+    </tr>
+  `).join('');
+
+  const filasPagos = cuenta.pagos.length > 0 ? `
+    <h3>Pagos registrados</h3>
+    <table class="tabla-factura">
+      <thead><tr><th>Fecha</th><th>Método</th><th style="text-align:right;">Monto</th></tr></thead>
+      <tbody>
+        ${cuenta.pagos.map(p => `
+          <tr>
+            <td>${new Date(p.fecha).toLocaleDateString('es-CO')}</td>
+            <td style="text-transform:capitalize;">${p.metodo_pago}</td>
+            <td style="text-align:right;">$${Number(p.monto).toLocaleString()}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : '';
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Factura #${cuenta.id_cuenta}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { padding: 40px; color: #1d1d1d; max-width: 700px; margin: 0 auto; }
+        .encabezado-factura { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1d9e75; padding-bottom: 16px; margin-bottom: 24px; }
+        .encabezado-factura h1 { font-size: 22px; color: #1d9e75; }
+        .encabezado-factura .folio { text-align: right; font-size: 13px; color: #666; }
+        .encabezado-factura .folio strong { font-size: 16px; color: #1d1d1d; display: block; }
+        .datos-cliente { margin-bottom: 24px; font-size: 13px; color: #444; }
+        .datos-cliente span { color: #888; display: block; font-size: 11px; text-transform: uppercase; margin-bottom: 2px; }
+        table.tabla-factura { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        table.tabla-factura th { background: #f4f7f6; text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase; color: #666; }
+        table.tabla-factura td { padding: 10px 12px; border-top: 1px solid #eee; }
+        .resumen-factura { margin-left: auto; width: 260px; font-size: 14px; }
+        .resumen-factura p { display: flex; justify-content: space-between; padding: 6px 0; }
+        .resumen-factura .total-final { border-top: 2px solid #1d1d1d; font-weight: 700; font-size: 16px; margin-top: 6px; padding-top: 10px; }
+        .estado-factura { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-top: 8px; }
+        h3 { font-size: 14px; margin: 20px 0 10px; color: #333; }
+        @media print {
+          body { padding: 20px; }
+          button { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="encabezado-factura">
+        <div>
+          <h1>PetClinic Manager</h1>
+          <p style="font-size:12px; color:#666;">Sistema de gestión veterinaria</p>
+        </div>
+        <div class="folio">
+          Factura<strong>#${String(cuenta.id_cuenta).padStart(6, '0')}</strong>
+          ${fechaFormateada}
+        </div>
+      </div>
+
+      <div class="datos-cliente">
+        <span>Cliente</span>
+        ${cuenta.propietario}
+        <br><br>
+        <span class="estado-factura" style="background:${cuenta.estado === 'pagada' ? '#e2f5ea' : cuenta.estado === 'parcial' ? '#fff6e0' : '#fdecea'}; color:${cuenta.estado === 'pagada' ? '#1d9e75' : cuenta.estado === 'parcial' ? '#93690a' : '#a83226'};">
+          ${cuenta.estado}
+        </span>
+      </div>
+
+      <table class="tabla-factura">
+        <thead>
+          <tr><th>Descripción</th><th style="text-align:center;">Cant.</th><th style="text-align:right;">Precio unit.</th><th style="text-align:right;">Subtotal</th></tr>
+        </thead>
+        <tbody>
+          ${filasItems}
+        </tbody>
+      </table>
+
+      <div class="resumen-factura">
+        <p><span>Subtotal</span><span>$${Number(cuenta.subtotal).toLocaleString()}</span></p>
+        <p class="total-final"><span>Total</span><span>$${Number(cuenta.total).toLocaleString()}</span></p>
+        <p><span>Pagado</span><span>$${totalPagado.toLocaleString()}</span></p>
+        <p><span>Saldo pendiente</span><span>$${saldo.toLocaleString()}</span></p>
+      </div>
+
+      ${filasPagos}
+
+      <button onclick="window.print()" style="margin-top:30px; padding:10px 20px; background:#1d9e75; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px;">Imprimir / Guardar como PDF</button>
+    </body>
+    </html>
+  `;
+
+  const ventana = window.open('', '_blank');
+  ventana.document.write(html);
+  ventana.document.close();
+}
 
 // ---- Carga inicial ----
 cargarCatalogos();

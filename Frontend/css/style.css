@@ -792,3 +792,8 @@ body.modo-oscuro .btn-secundario {
   color: #ddd;
 }
 body.modo-oscuro .btn-secundario:hover { background: #383c44; }
+
+.margen-tag {
+  color: #1d9e75;
+  font-weight: 600;
+}
