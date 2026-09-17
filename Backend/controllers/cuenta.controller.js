@@ -1,12 +1,12 @@
 const cuentaModel = require('../models/cuenta.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
     const cuentas = await cuentaModel.listar();
     res.json(cuentas);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -18,8 +18,7 @@ async function obtener(req, res) {
     }
     res.json(cuenta);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -48,8 +47,7 @@ async function crear(req, res) {
     if (error.codigoNegocio === 'ITEM_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -75,8 +73,7 @@ async function registrarPago(req, res) {
     if (error.codigoNegocio === 'CUENTA_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -86,8 +83,7 @@ async function deudas(req, res) {
     const resultado = await cuentaModel.listarDeudas();
     res.json(resultado);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

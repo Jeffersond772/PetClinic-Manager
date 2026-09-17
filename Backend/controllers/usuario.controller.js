@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const usuarioModel = require('../models/usuario.model');
+const { respuestaError } = require('../utils/manejarError');
 
 // CU01: Registro de usuario
 async function crear(req, res) {
@@ -28,9 +29,8 @@ async function crear(req, res) {
       id_usuario
     });
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -40,8 +40,7 @@ async function listar(req, res) {
     const usuarios = await usuarioModel.listarUsuarios();
     res.json(usuarios);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -53,9 +52,8 @@ async function obtener(req, res) {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
     res.json(usuario);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -72,9 +70,8 @@ async function actualizar(req, res) {
     await usuarioModel.actualizarUsuario(req.params.id, { nombre, correo, telefono, id_rol });
     res.json({ mensaje: 'Usuario actualizado correctamente' });
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -96,8 +93,7 @@ async function cambiarEstado(req, res) {
     res.json({ mensaje: `Usuario ${estado === 'activo' ? 'activado' : 'desactivado'} correctamente` });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

@@ -35,12 +35,12 @@ function pintarTabla(lista) {
     return;
   }
 
-  tablaPropietarios.innerHTML = lista.map(p => `
+    tablaPropietarios.innerHTML = lista.map(p => `
     <tr>
-      <td>${p.nombre}</td>
-      <td>${p.identificacion || '-'}</td>
-      <td>${p.telefono || '-'}</td>
-      <td>${p.correo || '-'}</td>
+      <td>${escaparHTML(p.nombre)}</td>
+      <td>${escaparHTML(p.identificacion) || '-'}</td>
+      <td>${escaparHTML(p.telefono) || '-'}</td>
+      <td>${escaparHTML(p.correo) || '-'}</td>
       <td><button class="btn-icono" onclick="verMascotas(${p.id_propietario})">Ver mascotas</button></td>
       <td><button class="btn-icono" onclick="editarPropietario(${p.id_propietario})">Editar</button></td>
     </tr>

@@ -30,4 +30,19 @@ async function actualizar(id_servicio, { nombre, precio, descripcion }) {
   );
 }
 
-module.exports = { listar, obtenerPorId, crear, actualizar };
+async function eliminar(id_servicio) {
+  const [usos] = await db.query(
+    `SELECT id_detalle FROM detalle_cuenta WHERE id_servicio = ? LIMIT 1`,
+    [id_servicio]
+  );
+
+  if (usos.length > 0) {
+    const error = new Error('No se puede eliminar: este servicio ya fue usado en una o más ventas');
+    error.codigoNegocio = 'EN_USO';
+    throw error;
+  }
+
+  await db.query(`DELETE FROM servicios WHERE id_servicio = ?`, [id_servicio]);
+}
+
+module.exports = { listar, obtenerPorId, crear, actualizar, eliminar };

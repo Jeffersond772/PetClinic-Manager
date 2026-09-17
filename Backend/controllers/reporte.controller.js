@@ -1,9 +1,10 @@
 const reporteModel = require('../models/reporte.model');
+const { respuestaError } = require('../utils/manejarError');
 
 function validarRango(req, res) {
   const { desde, hasta } = req.query;
   if (!desde || !hasta) {
-    res.status(400).json({ mensaje: 'Debes indicar el rango de fechas (desde y hasta)' });
+    respuestaError(res, new Error('Debes indicar el rango de fechas (desde y hasta)'));
     return null;
   }
   return { desde, hasta };
@@ -16,8 +17,7 @@ async function ingresos(req, res) {
     const datos = await reporteModel.ingresosPorPeriodo(rango.desde, rango.hasta);
     res.json(datos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -28,8 +28,7 @@ async function gastos(req, res) {
     const datos = await reporteModel.gastosPorPeriodo(rango.desde, rango.hasta);
     res.json(datos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -40,8 +39,7 @@ async function consultas(req, res) {
     const datos = await reporteModel.consultasPorPeriodo(rango.desde, rango.hasta);
     res.json(datos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -52,8 +50,7 @@ async function productosMovimiento(req, res) {
     const datos = await reporteModel.productosMayorMovimiento(rango.desde, rango.hasta);
     res.json(datos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -64,8 +61,7 @@ async function resumen(req, res) {
     const datos = await reporteModel.resumenGeneral(rango.desde, rango.hasta);
     res.json(datos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

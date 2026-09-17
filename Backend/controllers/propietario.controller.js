@@ -1,12 +1,12 @@
 const propietarioModel = require('../models/propietario.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
     const propietarios = await propietarioModel.listar();
     res.json(propietarios);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -18,8 +18,7 @@ async function obtener(req, res) {
     }
     res.json(propietario);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -35,8 +34,7 @@ async function buscar(req, res) {
     const resultados = await propietarioModel.buscar(termino);
     res.json(resultados);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -55,8 +53,7 @@ async function crear(req, res) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ mensaje: 'Ya existe un propietario con esa identificación' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -76,8 +73,7 @@ async function actualizar(req, res) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ mensaje: 'Ya existe otro propietario con esa identificación' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

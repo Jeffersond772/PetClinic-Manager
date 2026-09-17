@@ -49,12 +49,12 @@ async function cargarHistoria() {
 
 function pintarFicha(p) {
   fichaPaciente.innerHTML = `
-    <h2>${p.nombre}</h2>
-    <p class="subinfo">Propietario: ${p.propietario} · Tel: ${p.telefono_propietario || '-'}</p>
+    <h2>${escaparHTML(p.nombre)}</h2>
+    <p class="subinfo">Propietario: ${escaparHTML(p.propietario)} · Tel: ${escaparHTML(p.telefono_propietario) || '-'}</p>
     <div class="ficha-datos">
-      <div><span>Especie</span>${p.especie}</div>
-      <div><span>Raza</span>${p.raza || '-'}</div>
-      <div><span>Sexo</span>${p.sexo}</div>
+      <div><span>Especie</span>${escaparHTML(p.especie)}</div>
+      <div><span>Raza</span>${escaparHTML(p.raza) || '-'}</div>
+      <div><span>Sexo</span>${escaparHTML(p.sexo)}</div>
       <div><span>Peso actual</span>${p.peso ? p.peso + ' kg' : '-'}</div>
       <div><span>Nacimiento</span>${p.fecha_nacimiento ? p.fecha_nacimiento.split('T')[0] : '-'}</div>
     </div>
@@ -71,17 +71,17 @@ function pintarConsultas(consultas) {
     <div class="tarjeta-consulta">
       <div class="encabezado-consulta">
         <span>${c.fecha.split('T')[0]}</span>
-        <span>Dr(a). ${c.veterinario}</span>
+        <span>Dr(a). ${escaparHTML(c.veterinario)}</span>
       </div>
-      <h4>${c.motivo_consulta || 'Consulta general'}</h4>
-      ${c.sintomas ? `<p><span class="etiqueta">Síntomas:</span> ${c.sintomas}</p>` : ''}
-      ${c.diagnostico ? `<p><span class="etiqueta">Diagnóstico:</span> ${c.diagnostico}</p>` : ''}
-      ${c.observaciones ? `<p><span class="etiqueta">Observaciones:</span> ${c.observaciones}</p>` : ''}
+      <h4>${escaparHTML(c.motivo_consulta) || 'Consulta general'}</h4>
+      ${c.sintomas ? `<p><span class="etiqueta">Síntomas:</span> ${escaparHTML(c.sintomas)}</p>` : ''}
+      ${c.diagnostico ? `<p><span class="etiqueta">Diagnóstico:</span> ${escaparHTML(c.diagnostico)}</p>` : ''}
+      ${c.observaciones ? `<p><span class="etiqueta">Observaciones:</span> ${escaparHTML(c.observaciones)}</p>` : ''}
       ${c.tratamientos && c.tratamientos.length > 0 ? `
         <div class="lista-tratamientos-mostrar">
           <span class="etiqueta">Tratamientos:</span>
           <ul>
-            ${c.tratamientos.map(t => `<li>${t.producto || t.nombre_medicamento || 'Medicamento'} — ${t.dosis || ''} ${t.indicaciones ? '(' + t.indicaciones + ')' : ''}</li>`).join('')}
+            ${c.tratamientos.map(t => `<li>${escaparHTML(t.producto || t.nombre_medicamento || 'Medicamento')} — ${escaparHTML(t.dosis) || ''} ${t.indicaciones ? '(' + escaparHTML(t.indicaciones) + ')' : ''}</li>`).join('')}
           </ul>
         </div>
       ` : ''}
@@ -99,9 +99,9 @@ function pintarProcedimientos(procedimientos) {
     <tr>
       <td>${p.fecha.split('T')[0]}</td>
       <td style="text-transform: capitalize;">${p.tipo.replace('_', ' ')}</td>
-      <td>${p.producto || '-'}</td>
-      <td>${p.veterinario}</td>
-      <td>${p.observaciones || '-'}</td>
+      <td>${escaparHTML(p.producto) || '-'}</td>
+      <td>${escaparHTML(p.veterinario)}</td>
+      <td>${escaparHTML(p.observaciones) || '-'}</td>
     </tr>
   `).join('');
 }
@@ -211,6 +211,7 @@ document.getElementById('btnNuevoProcedimiento').addEventListener('click', () =>
     productosDisponibles.map(p => `<option value="${p.id_producto}">${p.nombre} (disp: ${p.cantidad_disponible})</option>`).join('');
 
   document.getElementById('fechaProcedimiento').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaProcedimiento').max = new Date().toISOString().split('T')[0];
   modalProcedimiento.classList.remove('oculto');
 });
 

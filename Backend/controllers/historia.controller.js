@@ -1,4 +1,5 @@
 const historiaModel = require('../models/historia.model');
+const { respuestaError } = require('../utils/manejarError');
 
 // CU14
 async function obtenerHistoria(req, res) {
@@ -11,9 +12,8 @@ async function obtenerHistoria(req, res) {
     }
 
     res.json(historia);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -23,6 +23,11 @@ async function registrarProcedimiento(req, res) {
 
   if (!id_paciente || !tipo || !fecha) {
     return res.status(400).json({ mensaje: 'Paciente, tipo de procedimiento y fecha son obligatorios' });
+  }
+
+  const hoy = new Date().toISOString().split('T')[0];
+  if (fecha > hoy) {
+    return res.status(400).json({ mensaje: 'La fecha del procedimiento no puede ser futura' });
   }
 
   try {
@@ -44,8 +49,7 @@ async function registrarProcedimiento(req, res) {
     if (error.codigoNegocio === 'PRODUCTO_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+        respuestaError(res, error);
   }
 }
 

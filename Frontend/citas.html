@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PetClinic Manager - Citas</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="dashboard-body">
 
   <header class="topbar">
@@ -87,7 +89,7 @@
         </select>
 
         <label for="fechaCita">Fecha</label>
-        <input type="date" id="fechaCita" required>
+        <input type="date" id="fechaCita" required min="">
 
         <label for="horaCita">Hora</label>
         <input type="time" id="horaCita" required>
@@ -108,4 +110,5 @@
   <script src="js/common.js"></script>
   <script src="js/citas.js"></script>
 </body>
+
 </html>

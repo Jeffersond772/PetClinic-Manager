@@ -9,5 +9,6 @@ router.get('/', verificarToken, servicioController.listar);
 // Crear y editar: solo Administrador (es parte de la "configuración" del negocio)
 router.post('/', verificarToken, verificarRol(['Administrador']), servicioController.crear);
 router.put('/:id', verificarToken, verificarRol(['Administrador']), servicioController.actualizar);
+router.delete('/:id', verificarToken, verificarRol(['Administrador']), servicioController.eliminar);
 
 module.exports = router;

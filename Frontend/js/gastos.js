@@ -30,13 +30,13 @@ function pintarTabla(gastos) {
     return;
   }
 
-  tablaGastos.innerHTML = gastos.map(g => `
+    tablaGastos.innerHTML = gastos.map(g => `
     <tr>
       <td>${g.fecha.split('T')[0]}</td>
-      <td>${g.concepto}</td>
-      <td>${g.categoria || '-'}</td>
+      <td>${escaparHTML(g.concepto)}</td>
+      <td>${escaparHTML(g.categoria) || '-'}</td>
       <td>$${Number(g.monto).toLocaleString()}</td>
-      <td>${g.registrado_por}</td>
+      <td>${escaparHTML(g.registrado_por)}</td>
     </tr>
   `).join('');
 }
@@ -44,6 +44,7 @@ function pintarTabla(gastos) {
 document.getElementById('btnNuevoGasto').addEventListener('click', () => {
   formGasto.reset();
   document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaGasto').max = new Date().toISOString().split('T')[0];
   mensajeErrorGasto.textContent = '';
   modalGasto.classList.remove('oculto');
 });

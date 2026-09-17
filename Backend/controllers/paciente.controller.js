@@ -1,12 +1,12 @@
 const pacienteModel = require('../models/paciente.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
     const pacientes = await pacienteModel.listar();
     res.json(pacientes);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -17,9 +17,8 @@ async function obtener(req, res) {
       return res.status(404).json({ mensaje: 'Paciente no encontrado' });
     }
     res.json(paciente);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -34,9 +33,8 @@ async function buscar(req, res) {
   try {
     const resultados = await pacienteModel.buscar(termino);
     res.json(resultados);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -46,8 +44,7 @@ async function porPropietario(req, res) {
     const pacientes = await pacienteModel.listarPorPropietario(req.params.idPropietario);
     res.json(pacientes);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -70,8 +67,7 @@ async function crear(req, res) {
     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
       return res.status(400).json({ mensaje: 'El propietario, especie o raza indicados no existen' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -98,8 +94,7 @@ async function actualizar(req, res) {
     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
       return res.status(400).json({ mensaje: 'La especie o raza indicadas no existen' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

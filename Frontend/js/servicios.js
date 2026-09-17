@@ -33,12 +33,15 @@ function pintarTabla(lista) {
     return;
   }
 
-  tablaServicios.innerHTML = lista.map(s => `
+    tablaServicios.innerHTML = lista.map(s => `
     <tr>
-      <td>${s.nombre}</td>
+      <td>${escaparHTML(s.nombre)}</td>
       <td>$${Number(s.precio).toLocaleString()}</td>
-      <td>${s.descripcion || '-'}</td>
-      <td><button class="btn-icono" onclick="editarServicio(${s.id_servicio})">Editar</button></td>
+      <td>${escaparHTML(s.descripcion) || '-'}</td>
+      <td>
+        <button class="btn-icono" onclick="editarServicio(${s.id_servicio})">Editar</button>
+        <button class="btn-icono" onclick="eliminarServicio(${s.id_servicio})">Eliminar</button>
+      </td>
     </tr>
   `).join('');
 }
@@ -104,5 +107,23 @@ formServicio.addEventListener('submit', async (e) => {
     mensajeErrorServicio.textContent = 'No se pudo conectar con el servidor';
   }
 });
+
+async function eliminarServicio(id_servicio) {
+  const ok = await confirmarAccion('¿Confirmas que deseas eliminar este servicio?');
+  if (!ok) return;
+
+  const respuesta = await fetch(`${API_URL}/api/servicios/${id_servicio}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+
+  if (!respuesta.ok) {
+    const resultado = await respuesta.json();
+    mostrarAlerta(resultado.mensaje || 'Ocurrió un error');
+    return;
+  }
+
+  cargarServicios();
+}
 
 cargarServicios();

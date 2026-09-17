@@ -1,3 +1,4 @@
+document.getElementById('fechaCita').min = new Date().toISOString().split('T')[0];
 const tablaCitas = document.getElementById('tablaCitas');
 const filtroDesde = document.getElementById('filtroDesde');
 const filtroHasta = document.getElementById('filtroHasta');
@@ -67,13 +68,13 @@ function pintarTabla(citas) {
     return;
   }
 
-  tablaCitas.innerHTML = citas.map(c => `
+    tablaCitas.innerHTML = citas.map(c => `
     <tr>
       <td>${c.fecha.split('T')[0]}</td>
       <td>${c.hora}</td>
-      <td>${c.paciente}</td>
-      <td>${c.propietario}</td>
-      <td>${c.veterinario}</td>
+      <td>${escaparHTML(c.paciente)}</td>
+      <td>${escaparHTML(c.propietario)}</td>
+      <td>${escaparHTML(c.veterinario)}</td>
       <td><span class="badge-estado badge-${c.estado}">${c.estado.replace('_', ' ')}</span></td>
       <td>
         ${c.estado === 'programada' ? `
@@ -131,12 +132,12 @@ inputPropietarioTexto.addEventListener('input', () => {
     });
     const resultados = await respuesta.json();
 
-    resultadosPropietario.innerHTML = resultados.length === 0
+      resultadosPropietario.innerHTML = resultados.length === 0
       ? `<div class="resultado-item">Sin coincidencias</div>`
       : resultados.map(p => `
           <div class="resultado-item" onclick="seleccionarPropietario(${p.id_propietario}, '${p.nombre.replace(/'/g, "\\'")}')">
-            ${p.nombre}
-            <small>${p.identificacion || 'Sin identificación'}</small>
+            ${escaparHTML(p.nombre)}
+            <small>${escaparHTML(p.identificacion) || 'Sin identificación'}</small>
           </div>
         `).join('');
 

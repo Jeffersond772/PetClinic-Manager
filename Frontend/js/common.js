@@ -1,3 +1,10 @@
+// Convierte cualquier texto a una versión segura para insertar con innerHTML
+function escaparHTML(texto) {
+  if (texto === null || texto === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = String(texto);
+  return div.innerHTML;
+}
 const API_URL = 'http://localhost:3000';
 
 // Protección de todas las páginas internas: si no hay sesión, fuera
@@ -69,6 +76,15 @@ const favicon = document.createElement('link');
 favicon.rel = 'icon';
 favicon.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%231d9e75"/></svg>';
 document.head.appendChild(favicon);
+
+// ---- Logo/título clickeable → Dashboard ----
+const tituloTopbar = document.querySelector('.topbar h1');
+if (tituloTopbar) {
+  tituloTopbar.style.cursor = 'pointer';
+  tituloTopbar.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+  });
+}
 
 if (elBtnLogout) {
   elBtnLogout.addEventListener('click', () => {

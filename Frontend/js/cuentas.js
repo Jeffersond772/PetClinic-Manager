@@ -57,17 +57,16 @@ function pintarTabla(cuentas) {
     return;
   }
 
-  tablaCuentas.innerHTML = cuentas.map(c => `
+    tablaCuentas.innerHTML = cuentas.map(c => `
     <tr>
       <td>${c.fecha.split('T')[0]}</td>
-      <td>${c.propietario}</td>
+      <td>${escaparHTML(c.propietario)}</td>
       <td>$${Number(c.total).toLocaleString()}</td>
       <td>$${Number(c.total_pagado).toLocaleString()}</td>
       <td><span class="badge-estado badge-${c.estado}">${c.estado}</span></td>
       <td><button class="btn-icono" onclick="verDetalle(${c.id_cuenta})">Ver / Pagar</button></td>
     </tr>
   `).join('');
-}
 
 // ==================== AUTOCOMPLETAR PROPIETARIO ====================
 
@@ -88,11 +87,11 @@ inputPropietarioTexto.addEventListener('input', () => {
     });
     const resultados = await respuesta.json();
 
-    resultadosPropietario.innerHTML = resultados.length === 0
+        resultadosPropietario.innerHTML = resultados.length === 0
       ? `<div class="resultado-item">Sin coincidencias</div>`
       : resultados.map(p => `
           <div class="resultado-item" onclick="seleccionarPropietario(${p.id_propietario}, '${p.nombre.replace(/'/g, "\\'")}')">
-            ${p.nombre}
+            ${escaparHTML(p.nombre)}
           </div>
         `).join('');
 
@@ -230,11 +229,11 @@ async function verDetalle(id_cuenta) {
   const totalPagado = cuenta.pagos.reduce((suma, p) => suma + Number(p.monto), 0);
   const saldo = Number(cuenta.total) - totalPagado;
 
-  contenidoDetalleCuenta.innerHTML = `
-    <p class="texto-secundario">Propietario: ${cuenta.propietario} · ${cuenta.fecha.split('T')[0]}</p>
+    contenidoDetalleCuenta.innerHTML = `
+    <p class="texto-secundario">Propietario: ${escaparHTML(cuenta.propietario)} · ${cuenta.fecha.split('T')[0]}</p>
     ${cuenta.detalle.map(d => `
       <div class="detalle-cuenta-item">
-        <span>${d.producto || d.servicio} (x${d.cantidad})${d.margen_porcentaje !== null ? ` <small class="margen-tag">margen ${d.margen_porcentaje}%</small>` : ''}</span>
+        <span>${escaparHTML(d.producto || d.servicio)} (x${d.cantidad})${d.margen_porcentaje !== null ? ` <small class="margen-tag">margen ${d.margen_porcentaje}%</small>` : ''}</span>
         <span>$${Number(d.subtotal).toLocaleString()}</span>
       </div>
     `).join('')}
@@ -304,9 +303,9 @@ function abrirFacturaImprimible(cuenta) {
   const fecha = new Date(cuenta.fecha);
   const fechaFormateada = fecha.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  const filasItems = cuenta.detalle.map(d => `
+    const filasItems = cuenta.detalle.map(d => `
     <tr>
-      <td>${d.producto || d.servicio}</td>
+      <td>${escaparHTML(d.producto || d.servicio)}</td>
       <td style="text-align:center;">${d.cantidad}</td>
       <td style="text-align:right;">$${Number(d.precio_unitario).toLocaleString()}</td>
       <td style="text-align:right;">$${Number(d.subtotal).toLocaleString()}</td>
@@ -370,9 +369,9 @@ function abrirFacturaImprimible(cuenta) {
         </div>
       </div>
 
-      <div class="datos-cliente">
+            <div class="datos-cliente">
         <span>Cliente</span>
-        ${cuenta.propietario}
+        ${escaparHTML(cuenta.propietario)}
         <br><br>
         <span class="estado-factura" style="background:${cuenta.estado === 'pagada' ? '#e2f5ea' : cuenta.estado === 'parcial' ? '#fff6e0' : '#fdecea'}; color:${cuenta.estado === 'pagada' ? '#1d9e75' : cuenta.estado === 'parcial' ? '#93690a' : '#a83226'};">
           ${cuenta.estado}
@@ -410,3 +409,4 @@ function abrirFacturaImprimible(cuenta) {
 // ---- Carga inicial ----
 cargarCatalogos();
 cargarCuentas();
+}

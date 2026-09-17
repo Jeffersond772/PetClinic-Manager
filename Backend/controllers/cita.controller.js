@@ -1,12 +1,12 @@
 const citaModel = require('../models/cita.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
     const citas = await citaModel.listar();
     res.json(citas);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -17,9 +17,8 @@ async function obtener(req, res) {
       return res.status(404).json({ mensaje: 'Cita no encontrada' });
     }
     res.json(cita);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -40,9 +39,8 @@ async function agenda(req, res) {
     }
 
     res.json({ citas });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -52,6 +50,11 @@ async function crear(req, res) {
 
   if (!id_paciente || !id_propietario || !id_veterinario || !fecha || !hora) {
     return res.status(400).json({ mensaje: 'Paciente, propietario, veterinario, fecha y hora son obligatorios' });
+  }
+
+  const hoy = new Date().toISOString().split('T')[0];
+  if (fecha < hoy) {
+    return res.status(400).json({ mensaje: 'No se puede agendar una cita en una fecha anterior a hoy' });
   }
 
   try {
@@ -71,8 +74,7 @@ async function crear(req, res) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -82,6 +84,11 @@ async function actualizar(req, res) {
 
   if (!fecha || !hora || !id_veterinario) {
     return res.status(400).json({ mensaje: 'Fecha, hora y veterinario son obligatorios' });
+  }
+
+  const hoy = new Date().toISOString().split('T')[0];
+  if (fecha < hoy) {
+    return res.status(400).json({ mensaje: 'No se puede modificar la cita a una fecha anterior a hoy' });
   }
 
   try {
@@ -103,8 +110,7 @@ async function actualizar(req, res) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -117,9 +123,8 @@ async function cancelar(req, res) {
     }
     await citaModel.cambiarEstado(req.params.id, 'cancelada');
     res.json({ mensaje: 'Cita cancelada correctamente' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -139,9 +144,8 @@ async function cambiarEstado(req, res) {
     }
     await citaModel.cambiarEstado(req.params.id, estado);
     res.json({ mensaje: 'Estado de la cita actualizado correctamente' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 

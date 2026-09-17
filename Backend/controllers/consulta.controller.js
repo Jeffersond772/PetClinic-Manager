@@ -1,12 +1,12 @@
 const consultaModel = require('../models/consulta.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listarPorPaciente(req, res) {
   try {
     const consultas = await consultaModel.listarPorPaciente(req.params.idPaciente);
     res.json(consultas);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -17,9 +17,8 @@ async function obtener(req, res) {
       return res.status(404).json({ mensaje: 'Consulta no encontrada' });
     }
     res.json(consulta);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
@@ -50,8 +49,7 @@ async function crear(req, res) {
     if (error.codigoNegocio === 'PRODUCTO_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

@@ -45,11 +45,11 @@ function pintarTabla(lista) {
     return;
   }
 
-  tablaUsuarios.innerHTML = lista.map(u => `
+    tablaUsuarios.innerHTML = lista.map(u => `
     <tr>
-      <td>${u.nombre}</td>
-      <td>${u.correo}</td>
-      <td>${u.rol}</td>
+      <td>${escaparHTML(u.nombre)}</td>
+      <td>${escaparHTML(u.correo)}</td>
+      <td>${escaparHTML(u.rol)}</td>
       <td><span class="badge-estado badge-${u.estado === 'activo' ? 'atendida' : 'cancelada'}">${u.estado}</span></td>
       <td>
         <button class="btn-icono" onclick="editarUsuario(${u.id_usuario})">Editar</button>

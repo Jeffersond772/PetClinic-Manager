@@ -1,12 +1,12 @@
 const catalogoModel = require('../models/catalogo.model');
+const { respuestaError } = require('../utils/manejarError');    
 
 async function especies(req, res) {
   try {
     const data = await catalogoModel.listarEspecies();
     res.json(data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -16,8 +16,7 @@ async function razas(req, res) {
     const data = await catalogoModel.listarRazas(req.query.id_especie);
     res.json(data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -26,8 +25,7 @@ async function roles(req, res) {
     const data = await catalogoModel.listarRoles();
     res.json(data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -36,8 +34,7 @@ async function categoriasProducto(req, res) {
     const data = await catalogoModel.listarCategoriasProducto();
     res.json(data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -46,8 +43,7 @@ async function veterinarios(req, res) {
     const data = await catalogoModel.listarVeterinarios();
     res.json(data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 

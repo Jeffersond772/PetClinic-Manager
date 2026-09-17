@@ -901,3 +901,23 @@ body.modo-oscuro .detalle-cuenta-item { border-bottom-color: #303338; color: #dd
 body.modo-oscuro .detalle-cuenta-resumen { border-top-color: #3a3d42; color: #eaeaea; }
 
 body.modo-oscuro .modal-confirm p { color: #eaeaea; }
+
+body.modo-oscuro .fila-stock-bajo {
+  background-color: #3a2020 !important;
+}
+
+body.modo-oscuro .alerta-stock-bajo {
+  background: #3a2020;
+  color: #f0a099;
+  border-color: #5a3030;
+}
+
+body.modo-oscuro .alerta-vencimiento {
+  background: #3a3320;
+  color: #f0d099;
+  border-color: #5a4f30;
+}
+
+body.modo-oscuro .tabla-datos tbody tr:hover {
+  background-color: #282b31;
+}

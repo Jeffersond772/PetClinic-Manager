@@ -1,12 +1,12 @@
 const servicioModel = require('../models/servicio.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
     const servicios = await servicioModel.listar();
     res.json(servicios);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -21,9 +21,8 @@ async function crear(req, res) {
     const id_servicio = await servicioModel.crear({ nombre, precio, descripcion });
     res.status(201).json({ mensaje: 'Servicio registrado correctamente', id_servicio });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
-  }
+    respuestaError(res, error);
+  } 
 }
 
 async function actualizar(req, res) {
@@ -41,9 +40,24 @@ async function actualizar(req, res) {
     await servicioModel.actualizar(req.params.id, { nombre, precio, descripcion });
     res.json({ mensaje: 'Servicio actualizado correctamente' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
+  } 
+}
+
+async function eliminar(req, res) {
+  try {
+    const servicio = await servicioModel.obtenerPorId(req.params.id);
+    if (!servicio) {
+      return res.status(404).json({ mensaje: 'Servicio no encontrado' });
+    }
+    await servicioModel.eliminar(req.params.id);
+    res.json({ mensaje: 'Servicio eliminado correctamente' });
+  } catch (error) {
+    if (error.codigoNegocio === 'EN_USO') {
+      return res.status(409).json({ mensaje: error.message });
+    }
+    respuestaError(res, error);
   }
 }
 
-module.exports = { listar, crear, actualizar };
+module.exports = { listar, crear, actualizar, eliminar };

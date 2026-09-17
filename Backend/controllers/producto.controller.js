@@ -1,12 +1,12 @@
 const productoModel = require('../models/producto.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
     const productos = await productoModel.listar();
     res.json(productos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -18,8 +18,7 @@ async function obtener(req, res) {
     }
     res.json(producto);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -32,8 +31,7 @@ async function buscar(req, res) {
     const resultados = await productoModel.buscar(termino);
     res.json(resultados);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -43,10 +41,10 @@ async function bajoStock(req, res) {
     const productos = await productoModel.listarBajoStock();
     res.json(productos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
-}
+  }
+
 
 // CU19
 async function proximosAVencer(req, res) {
@@ -54,10 +52,12 @@ async function proximosAVencer(req, res) {
     const productos = await productoModel.listarProximosAVencer();
     res.json(productos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
+
+// CU04
+    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
 
 // CU04
 async function crear(req, res) {
@@ -65,6 +65,12 @@ async function crear(req, res) {
 
   if (!nombre || !id_categoria || precio === undefined) {
     return res.status(400).json({ mensaje: 'Nombre, categoría y precio son obligatorios' });
+  }
+    if (fecha_vencimiento) {
+    const hoy = new Date().toISOString().split('T')[0];
+    if (fecha_vencimiento < hoy) {
+      return res.status(400).json({ mensaje: 'La fecha de vencimiento no puede ser anterior a hoy' });
+    }
   }
 
   try {
@@ -76,8 +82,7 @@ async function crear(req, res) {
     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
       return res.status(400).json({ mensaje: 'La categoría o el proveedor indicados no existen' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -87,6 +92,13 @@ async function actualizar(req, res) {
 
   if (!nombre || !id_categoria || precio === undefined) {
     return res.status(400).json({ mensaje: 'Nombre, categoría y precio son obligatorios' });
+  }
+
+    if (fecha_vencimiento) {
+    const hoy = new Date().toISOString().split('T')[0];
+    if (fecha_vencimiento < hoy) {
+      return res.status(400).json({ mensaje: 'La fecha de vencimiento no puede ser anterior a hoy' });
+    }
   }
 
   try {
@@ -103,9 +115,9 @@ async function actualizar(req, res) {
     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
       return res.status(400).json({ mensaje: 'La categoría o el proveedor indicados no existen' });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
+
 }
 
 module.exports = { listar, obtener, buscar, bajoStock, proximosAVencer, crear, actualizar };

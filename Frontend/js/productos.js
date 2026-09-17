@@ -1,3 +1,5 @@
+const hoyISO = new Date().toISOString().split('T')[0];
+document.getElementById('fechaVencimiento').min = hoyISO;
 const tablaProductos = document.getElementById('tablaProductos');
 const inputBuscar = document.getElementById('inputBuscar');
 const alertasStock = document.getElementById('alertasStock');
@@ -44,11 +46,11 @@ async function cargarAlertas() {
   const proximosVencer = await respVencer.json();
 
   let html = '';
-  if (bajoStock.length > 0) {
-    html += `<div class="alerta alerta-stock-bajo">${bajoStock.length} producto(s) en o por debajo del stock mínimo: ${bajoStock.map(p => p.nombre).join(', ')}</div>`;
+    if (bajoStock.length > 0) {
+    html += `<div class="alerta alerta-stock-bajo">${bajoStock.length} producto(s) en o por debajo del stock mínimo: ${bajoStock.map(p => escaparHTML(p.nombre)).join(', ')}</div>`;
   }
   if (proximosVencer.length > 0) {
-    html += `<div class="alerta alerta-vencimiento">${proximosVencer.length} producto(s) próximos a vencer (30 días): ${proximosVencer.map(p => p.nombre).join(', ')}</div>`;
+    html += `<div class="alerta alerta-vencimiento">${proximosVencer.length} producto(s) próximos a vencer (30 días): ${proximosVencer.map(p => escaparHTML(p.nombre)).join(', ')}</div>`;
   }
   alertasStock.innerHTML = html;
 }
@@ -82,14 +84,14 @@ function pintarTabla(lista) {
     return;
   }
 
-  tablaProductos.innerHTML = lista.map(p => {
+    tablaProductos.innerHTML = lista.map(p => {
     const bajoStock = Number(p.cantidad_disponible) <= Number(p.stock_minimo);
     return `
       <tr class="${bajoStock ? 'fila-stock-bajo' : ''}">
-        <td>${p.nombre}</td>
-        <td>${p.categoria}</td>
+        <td>${escaparHTML(p.nombre)}</td>
+        <td>${escaparHTML(p.categoria)}</td>
         <td>$${Number(p.precio).toLocaleString()}</td>
-        <td>${p.cantidad_disponible} ${p.unidad_medida}</td>
+        <td>${p.cantidad_disponible} ${escaparHTML(p.unidad_medida)}</td>
         <td>${p.fecha_vencimiento ? p.fecha_vencimiento.split('T')[0] : '-'}</td>
         <td>
           <button class="btn-icono" onclick="abrirMovimiento(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}', 'entrada')">Entrada</button>

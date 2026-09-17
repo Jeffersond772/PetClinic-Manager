@@ -24,7 +24,16 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
+const limitadorLogin = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 intentos
+  message: { mensaje: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 // Aquí montaremos las rutas de cada módulo más adelante:
+app.use('/api/auth/login', limitadorLogin);
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/propietarios', require('./routes/propietarios.routes'));
@@ -39,6 +48,7 @@ app.use('/api/cuentas', require('./routes/cuentas.routes'));
 app.use('/api/gastos', require('./routes/gastos.routes'));
 app.use('/api/servicios', require('./routes/servicios.routes'));
 app.use('/api/reportes', require('./routes/reportes.routes'));
+const rateLimit = require('express-rate-limit');
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

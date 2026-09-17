@@ -79,14 +79,16 @@ function pintarTabla(lista) {
     return;
   }
 
-  tablaPacientes.innerHTML = lista.map(p => `
+    tablaPacientes.innerHTML = lista.map(p => `
     <tr>
-      <td>${p.nombre}</td>
-      <td>${p.especie}</td>
-      <td>${p.raza || '-'}</td>
-      <td>${p.propietario || '-'}</td>
-      <td><button class="btn-icono" onclick="window.location.href='historia.html?id_paciente=${p.id_paciente}'">Ver historia</button>
-<button class="btn-icono" onclick="editarPaciente(${p.id_paciente})">Editar</button></td>
+      <td>${escaparHTML(p.nombre)}</td>
+      <td>${escaparHTML(p.especie)}</td>
+      <td>${escaparHTML(p.raza) || '-'}</td>
+      <td>${escaparHTML(p.propietario) || '-'}</td>
+      <td>
+        <button class="btn-icono" onclick="window.location.href='historia.html?id_paciente=${p.id_paciente}'">Ver historia</button>
+        <button class="btn-icono" onclick="editarPaciente(${p.id_paciente})">Editar</button>
+      </td>
     </tr>
   `).join('');
 }
@@ -130,12 +132,10 @@ inputPropietarioTexto.addEventListener('input', () => {
     const resultados = await respuesta.json();
 
     if (resultados.length === 0) {
-      resultadosPropietario.innerHTML = `<div class="resultado-item">Sin coincidencias</div>`;
-    } else {
-      resultadosPropietario.innerHTML = resultados.map(p => `
+          resultadosPropietario.innerHTML = resultados.map(p => `
         <div class="resultado-item" onclick="seleccionarPropietario(${p.id_propietario}, '${p.nombre.replace(/'/g, "\\'")}')">
-          ${p.nombre}
-          <small>${p.identificacion || 'Sin identificación'}</small>
+          ${escaparHTML(p.nombre)}
+          <small>${escaparHTML(p.identificacion) || 'Sin identificación'}</small>
         </div>
       `).join('');
     }

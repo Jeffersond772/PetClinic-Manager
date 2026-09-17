@@ -1,4 +1,5 @@
 const movimientoModel = require('../models/movimiento.model');
+const { respuestaError } = require('../utils/manejarError');
 
 // CU06: registrar entrada de inventario
 async function registrarEntrada(req, res) {
@@ -23,8 +24,7 @@ async function registrarEntrada(req, res) {
     if (error.codigoNegocio === 'PRODUCTO_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -54,8 +54,7 @@ async function registrarSalida(req, res) {
     if (error.codigoNegocio === 'PRODUCTO_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -65,8 +64,7 @@ async function historialPorProducto(req, res) {
     const movimientos = await movimientoModel.listarPorProducto(req.params.idProducto);
     res.json(movimientos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
@@ -76,8 +74,7 @@ async function historialGeneral(req, res) {
     const movimientos = await movimientoModel.listarTodos();
     res.json(movimientos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    respuestaError(res, error);
   }
 }
 
