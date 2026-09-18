@@ -7,7 +7,11 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 
 // Middlewares
-app.use(cors());
+const origenesPermitidos = process.env.FRONTEND_URL
+  ? [process.env.FRONTEND_URL]
+  : '*'; // en desarrollo local, permite cualquier origen
+
+app.use(cors({ origin: origenesPermitidos }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
