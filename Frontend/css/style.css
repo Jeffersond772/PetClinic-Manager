@@ -942,6 +942,106 @@ body.modo-oscuro ::-webkit-scrollbar-thumb:hover { background: #4a4d52; }
   font-size: 13px;
 }
 
+.vista-activa {
+  background-color: #1d9e75 !important;
+  color: white !important;
+}
+
+.calendario-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.calendario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendario-header h3 {
+  font-size: 16px;
+  color: #1d1d1d;
+  text-transform: capitalize;
+}
+
+.calendario-diassemana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dia-calendario {
+  min-height: 90px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  overflow: hidden;
+}
+
+.dia-calendario:hover {
+  background-color: #f4f7f6;
+}
+
+.dia-calendario.fuera-de-mes {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dia-calendario.hoy {
+  border-color: #1d9e75;
+  border-width: 2px;
+}
+
+.numero-dia {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.chip-cita-calendario {
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: white;
+}
+
+.chip-programada { background: #1d5fa8; }
+.chip-atendida { background: #1d9e75; }
+.chip-cancelada { background: #d64545; }
+.chip-no_asistio { background: #999; }
+
+.mas-citas {
+  font-size: 10px;
+  color: #888;
+  font-weight: 600;
+}
+
+body.modo-oscuro .calendario-container { background: #23262b; }
+body.modo-oscuro .calendario-header h3 { color: #eaeaea; }
+body.modo-oscuro .dia-calendario { border-color: #303338; }
+body.modo-oscuro .dia-calendario:hover { background-color: #2a2d33; }
+body.modo-oscuro .numero-dia { color: #ccc; }
+
 body.modo-oscuro .item-proxima-cita:hover { background-color: #2a2d33; }
 body.modo-oscuro .item-proxima-cita strong { color: #eaeaea; }
 

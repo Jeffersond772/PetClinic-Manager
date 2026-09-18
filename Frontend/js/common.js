@@ -5,7 +5,6 @@ function escaparHTML(texto) {
   div.textContent = String(texto);
   return div.innerHTML;
 }
-const API_URL = 'http://localhost:3000';
 
 // Protección de todas las páginas internas: si no hay sesión, fuera
 const token = localStorage.getItem('token');

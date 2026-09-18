@@ -23,11 +23,16 @@
     <nav class="sidebar" id="sidebarMenu"></nav>
 
     <main class="contenido">
-      <div class="encabezado-seccion">
+            <div class="encabezado-seccion">
         <h2>Agenda de citas</h2>
-        <button id="btnNuevaCita" class="btn-primario">Agendar cita</button>
+        <div>
+          <button id="btnVistaLista" class="btn-secundario vista-activa">Vista lista</button>
+          <button id="btnVistaCalendario" class="btn-secundario">Vista calendario</button>
+          <button id="btnNuevaCita" class="btn-primario">Agendar cita</button>
+        </div>
       </div>
 
+      <div id="vistaListaContainer">
       <div class="filtros-agenda">
         <div>
           <label for="filtroDesde">Desde</label>
@@ -62,7 +67,20 @@
           </tr>
         </thead>
         <tbody id="tablaCitas"></tbody>
-      </table>
+            </table>
+      </div>
+
+      <div id="vistaCalendarioContainer" class="calendario-container oculto">
+        <div class="calendario-header">
+          <button type="button" id="btnMesAnterior" class="btn-secundario">‹ Anterior</button>
+          <h3 id="tituloMesCalendario"></h3>
+          <button type="button" id="btnMesSiguiente" class="btn-secundario">Siguiente ›</button>
+        </div>
+        <div class="calendario-diassemana">
+          <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div class="calendario-grid" id="calendarioGrid"></div>
+      </div>
     </main>
   </div>
 
@@ -106,7 +124,7 @@
       </form>
     </div>
   </div>
-
+  <script src="js/config.js"></script>
   <script src="js/common.js"></script>
   <script src="js/citas.js"></script>
 </body>

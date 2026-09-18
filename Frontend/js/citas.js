@@ -278,3 +278,110 @@ async function marcarEstado(id_cita, estado) {
 // ---- Carga inicial: mostrar la semana actual por defecto ----
 document.getElementById('btnSemana').click();
 cargarVeterinarios();
+
+// ==================== VISTA CALENDARIO ====================
+
+const vistaListaContainer = document.getElementById('vistaListaContainer');
+const vistaCalendarioContainer = document.getElementById('vistaCalendarioContainer');
+const btnVistaLista = document.getElementById('btnVistaLista');
+const btnVistaCalendario = document.getElementById('btnVistaCalendario');
+const tituloMesCalendario = document.getElementById('tituloMesCalendario');
+const calendarioGrid = document.getElementById('calendarioGrid');
+
+let mesCalendarioActual = new Date();
+
+btnVistaLista.addEventListener('click', () => {
+  vistaListaContainer.style.display = 'block';
+  vistaCalendarioContainer.classList.add('oculto');
+  btnVistaLista.classList.add('vista-activa');
+  btnVistaCalendario.classList.remove('vista-activa');
+});
+
+btnVistaCalendario.addEventListener('click', () => {
+  vistaListaContainer.style.display = 'none';
+  vistaCalendarioContainer.classList.remove('oculto');
+  btnVistaCalendario.classList.add('vista-activa');
+  btnVistaLista.classList.remove('vista-activa');
+  cargarCalendario();
+});
+
+document.getElementById('btnMesAnterior').addEventListener('click', () => {
+  mesCalendarioActual.setMonth(mesCalendarioActual.getMonth() - 1);
+  cargarCalendario();
+});
+
+document.getElementById('btnMesSiguiente').addEventListener('click', () => {
+  mesCalendarioActual.setMonth(mesCalendarioActual.getMonth() + 1);
+  cargarCalendario();
+});
+
+async function cargarCalendario() {
+  const año = mesCalendarioActual.getFullYear();
+  const mes = mesCalendarioActual.getMonth();
+
+  const primerDiaMes = new Date(año, mes, 1);
+  const ultimoDiaMes = new Date(año, mes + 1, 0);
+
+  tituloMesCalendario.textContent = mesCalendarioActual.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+
+  const idVet = filtroVeterinario.value;
+  let url = `${API_URL}/api/citas/agenda?desde=${formatearFecha(primerDiaMes)}&hasta=${formatearFecha(ultimoDiaMes)}`;
+  if (idVet) url += `&id_veterinario=${idVet}`;
+
+  const respuesta = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+  const resultado = await respuesta.json();
+  const citas = resultado.citas || [];
+
+  const citasPorDia = {};
+  citas.forEach(c => {
+    const dia = c.fecha.split('T')[0];
+    if (!citasPorDia[dia]) citasPorDia[dia] = [];
+    citasPorDia[dia].push(c);
+  });
+
+  renderizarCalendario(primerDiaMes, ultimoDiaMes, citasPorDia);
+}
+
+function renderizarCalendario(primerDiaMes, ultimoDiaMes, citasPorDia) {
+  const hoyStr = formatearFecha(new Date());
+  const diaSemanaInicio = primerDiaMes.getDay(); // 0 = domingo
+  const totalDiasMes = ultimoDiaMes.getDate();
+
+  const celdas = [];
+
+  // Días vacíos antes del día 1 (del mes anterior)
+  for (let i = 0; i < diaSemanaInicio; i++) {
+    celdas.push({ vacio: true });
+  }
+
+  // Días del mes actual
+  for (let dia = 1; dia <= totalDiasMes; dia++) {
+    const fechaCelda = new Date(primerDiaMes.getFullYear(), primerDiaMes.getMonth(), dia);
+    const fechaStr = formatearFecha(fechaCelda);
+    celdas.push({ dia, fechaStr, citas: citasPorDia[fechaStr] || [], esHoy: fechaStr === hoyStr });
+  }
+
+  calendarioGrid.innerHTML = celdas.map(c => {
+    if (c.vacio) return `<div class="dia-calendario fuera-de-mes"></div>`;
+
+    const citasDia = c.citas.slice(0, 3);
+    const restantes = c.citas.length - citasDia.length;
+
+    return `
+      <div class="dia-calendario ${c.esHoy ? 'hoy' : ''}" onclick="irADiaEnLista('${c.fechaStr}')">
+        <div class="numero-dia">${c.dia}</div>
+        ${citasDia.map(cita => `
+          <div class="chip-cita-calendario chip-${cita.estado}">${cita.hora.slice(0,5)} ${escaparHTML(cita.paciente)}</div>
+        `).join('')}
+        ${restantes > 0 ? `<div class="mas-citas">+${restantes} más</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function irADiaEnLista(fechaStr) {
+  filtroDesde.value = fechaStr;
+  filtroHasta.value = fechaStr;
+  cargarAgenda();
+  btnVistaLista.click();
+}

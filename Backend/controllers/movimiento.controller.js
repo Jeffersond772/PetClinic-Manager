@@ -9,12 +9,17 @@ async function registrarEntrada(req, res) {
     return res.status(400).json({ mensaje: 'Producto y cantidad (mayor a 0) son obligatorios' });
   }
 
+    const motivoFinal = motivo || 'ajuste';
+  if (motivoFinal !== 'ajuste') {
+    return res.status(400).json({ mensaje: 'Las entradas por compra deben registrarse desde el módulo de Compras' });
+  }
+
   try {
     const id_movimiento = await movimientoModel.registrarEntrada({
       id_producto,
       cantidad,
       costo_unitario,
-      motivo: motivo || 'compra',
+      motivo: motivoFinal,
       id_usuario: req.usuario.id_usuario
     });
 
@@ -36,11 +41,16 @@ async function registrarSalida(req, res) {
     return res.status(400).json({ mensaje: 'Producto y cantidad (mayor a 0) son obligatorios' });
   }
 
+    const motivoFinal = motivo || 'ajuste';
+  if (!['ajuste', 'consumo_interno'].includes(motivoFinal)) {
+    return res.status(400).json({ mensaje: 'Las salidas por venta o consulta se registran automáticamente desde Ventas o Consultas' });
+  }
+
   try {
     const id_movimiento = await movimientoModel.registrarSalida({
       id_producto,
       cantidad,
-      motivo: motivo || 'venta',
+      motivo: motivoFinal,
       id_usuario: req.usuario.id_usuario
     });
 

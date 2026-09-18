@@ -26,8 +26,8 @@ const selectMotivo = document.getElementById('motivoMovimiento');
 let productos = [];
 
 const motivosPorTipo = {
-  entrada: ['compra', 'ajuste'],
-  salida: ['venta', 'consumo_interno', 'consulta', 'ajuste']
+  entrada: ['ajuste'],
+  salida: ['ajuste', 'consumo_interno']
 };
 
 // ---- Cargar categorías para el <select> ----
@@ -99,8 +99,7 @@ function pintarTabla(lista) {
         <td>${p.cantidad_disponible} ${escaparHTML(p.unidad_medida)}</td>
         <td>${p.fecha_vencimiento ? p.fecha_vencimiento.split('T')[0] : '-'}</td>
         <td>
-          <button class="btn-icono" onclick="abrirMovimiento(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}', 'entrada')">Entrada</button>
-          <button class="btn-icono" onclick="abrirMovimiento(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}', 'salida')">Salida</button>
+                    <button class="btn-icono" onclick="abrirMovimiento(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}')">Ajustar</button>
           <button class="btn-icono" onclick="editarProducto(${p.id_producto})">Editar</button>
         </td>
       </tr>
@@ -201,22 +200,28 @@ formProducto.addEventListener('submit', async (e) => {
 
 // ==================== MODAL MOVIMIENTO (entrada/salida) ====================
 
-function abrirMovimiento(id_producto, nombreProducto, tipo) {
+function abrirMovimiento(id_producto, nombreProducto) {
   formMovimiento.reset();
   document.getElementById('idProductoMovimiento').value = id_producto;
-  document.getElementById('tipoMovimiento').value = tipo;
   productoMovimientoNombre.textContent = `Producto: ${nombreProducto}`;
-  tituloModalMovimiento.textContent = tipo === 'entrada' ? 'Registrar entrada' : 'Registrar salida';
+  tituloModalMovimiento.textContent = 'Ajustar inventario';
   mensajeErrorMovimiento.textContent = '';
 
-  grupoCostoUnitario.style.display = tipo === 'entrada' ? 'block' : 'none';
-
-  selectMotivo.innerHTML = motivosPorTipo[tipo]
-    .map(m => `<option value="${m}">${m.replace('_', ' ')}</option>`)
-    .join('');
+  document.getElementById('tipoMovimientoSelect').value = 'entrada';
+  actualizarCamposAjuste();
 
   modalMovimiento.classList.remove('oculto');
 }
+
+function actualizarCamposAjuste() {
+  const tipo = document.getElementById('tipoMovimientoSelect').value;
+  grupoCostoUnitario.style.display = tipo === 'entrada' ? 'block' : 'none';
+  selectMotivo.innerHTML = motivosPorTipo[tipo]
+    .map(m => `<option value="${m}">${m.replace('_', ' ')}</option>`)
+    .join('');
+}
+
+document.getElementById('tipoMovimientoSelect').addEventListener('change', actualizarCamposAjuste);
 
 document.getElementById('btnCancelarMovimiento').addEventListener('click', () => {
   modalMovimiento.classList.add('oculto');
@@ -226,7 +231,7 @@ formMovimiento.addEventListener('submit', async (e) => {
   e.preventDefault();
   mensajeErrorMovimiento.textContent = '';
 
-  const tipo = document.getElementById('tipoMovimiento').value;
+    const tipo = document.getElementById('tipoMovimientoSelect').value;
   const id_producto = document.getElementById('idProductoMovimiento').value;
 
   const datos = {
