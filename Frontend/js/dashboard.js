@@ -107,12 +107,17 @@ if (tarjetasResumenDashboard) {
     }
   }
 
-  async function cargarGraficosDashboard() {
+    async function cargarGraficosDashboard() {
     try {
+      const puedeVerConsultas = usuario.rol === 'Administrador' || usuario.rol === 'Veterinario';
+
       const promesas = [
-        fetch(`${API_URL}/api/reportes/consultas?desde=${desde}&hasta=${hasta}`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${API_URL}/api/reportes/citas-estado?desde=${desde}&hasta=${hasta}`, { headers: { 'Authorization': `Bearer ${token}` } })
       ];
+
+      if (puedeVerConsultas) {
+        promesas.push(fetch(`${API_URL}/api/reportes/consultas?desde=${desde}&hasta=${hasta}`, { headers: { 'Authorization': `Bearer ${token}` } }));
+      }
 
       if (usuario.rol === 'Administrador') {
         promesas.push(
@@ -122,20 +127,7 @@ if (tarjetasResumenDashboard) {
       }
 
       const respuestas = await Promise.all(promesas);
-      const consultas = await respuestas[0].json();
-      const citasEstado = await respuestas[1].json();
-
-      const canvasConsultas = document.getElementById('graficoConsultasDashboard');
-      if (canvasConsultas) {
-        new Chart(canvasConsultas, {
-          type: 'bar',
-          data: {
-            labels: consultas.porDia.map(d => d.dia.split('-').slice(1).reverse().join('/')),
-            datasets: [{ label: 'Consultas', data: consultas.porDia.map(d => d.total), backgroundColor: '#1d5fa8', borderRadius: 6 }]
-          },
-          options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
-        });
-      }
+      const citasEstado = await respuestas[0].json();
 
       const canvasCitasEstado = document.getElementById('graficoCitasEstado');
       if (canvasCitasEstado) {
@@ -153,9 +145,31 @@ if (tarjetasResumenDashboard) {
         });
       }
 
+      let indiceSiguiente = 1;
+
+      if (puedeVerConsultas) {
+        const consultas = await respuestas[indiceSiguiente].json();
+        indiceSiguiente++;
+
+        const canvasConsultas = document.getElementById('graficoConsultasDashboard');
+        if (canvasConsultas) {
+          new Chart(canvasConsultas, {
+            type: 'bar',
+            data: {
+              labels: consultas.porDia.map(d => d.dia.split('-').slice(1).reverse().join('/')),
+              datasets: [{ label: 'Consultas', data: consultas.porDia.map(d => d.total), backgroundColor: '#1d5fa8', borderRadius: 6 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
+          });
+        }
+      } else {
+        const contenedorConsultas = document.getElementById('graficoConsultasDashboard');
+        if (contenedorConsultas) contenedorConsultas.closest('.tarjeta-grafico').style.display = 'none';
+      }
+
       if (usuario.rol === 'Administrador') {
-        const ingresos = await respuestas[2].json();
-        const gastos = await respuestas[3].json();
+        const ingresos = await respuestas[indiceSiguiente].json();
+        const gastos = await respuestas[indiceSiguiente + 1].json();
         const dias = [...new Set([...ingresos.map(i => i.dia), ...gastos.map(g => g.dia)])].sort();
 
         const canvasFinanciero = document.getElementById('graficoFinancieroDashboard');

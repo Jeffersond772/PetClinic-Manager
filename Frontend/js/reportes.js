@@ -30,11 +30,15 @@ async function cargarReportes() {
     return;
   }
 
-  const resumen = await resResumen.json();
+    const resumen = await resResumen.json();
   const ingresos = await resIngresos.json();
   const gastos = await resGastos.json();
   const consultas = await resConsultas.json();
   const productos = await resProductos.json();
+
+  ingresos.forEach(i => { i.dia = i.dia.slice(0, 10); });
+  gastos.forEach(g => { g.dia = g.dia.slice(0, 10); });
+  consultas.porDia.forEach(d => { d.dia = d.dia.slice(0, 10); });
 
   pintarTarjetas(resumen);
   pintarGraficoFinanciero(ingresos, gastos);

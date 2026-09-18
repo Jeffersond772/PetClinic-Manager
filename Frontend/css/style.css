@@ -1036,6 +1036,25 @@ body.modo-oscuro ::-webkit-scrollbar-thumb:hover { background: #4a4d52; }
   font-weight: 600;
 }
 
+/* Transición suave entre páginas (Chrome, Edge, Safari — en Firefox simplemente
+   no aplica y navega normal, sin errores) */
+@view-transition {
+  navigation: auto;
+}
+
+/* Evita que el sidebar y la topbar "parpadeen" al cambiar de módulo:
+   el navegador los trata como elementos persistentes en la transición */
+.topbar,
+.sidebar {
+  view-transition-name: layout-persistente;
+}
+
+/* Desactiva la API experimental de transiciones de página de Chrome,
+   que puede generar conflictos con elementos repetidos entre páginas (header, sidebar) */
+@view-transition {
+  navigation: none;
+}
+
 body.modo-oscuro .calendario-container { background: #23262b; }
 body.modo-oscuro .calendario-header h3 { color: #eaeaea; }
 body.modo-oscuro .dia-calendario { border-color: #303338; }

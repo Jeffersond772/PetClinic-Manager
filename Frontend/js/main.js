@@ -1,5 +1,3 @@
-const API_URL = 'http://localhost:3000';
-
 const loginForm = document.getElementById('loginForm');
 const mensajeError = document.getElementById('mensajeError');
 
