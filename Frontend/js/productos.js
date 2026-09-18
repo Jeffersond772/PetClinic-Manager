@@ -1,5 +1,10 @@
-const hoyISO = new Date().toISOString().split('T')[0];
-document.getElementById('fechaVencimiento').min = hoyISO;
+function fechaLocalISO(fecha) {
+  const año = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${año}-${mes}-${dia}`;
+}
+document.getElementById('fechaVencimiento').min = fechaLocalISO(new Date());
 const tablaProductos = document.getElementById('tablaProductos');
 const inputBuscar = document.getElementById('inputBuscar');
 const alertasStock = document.getElementById('alertasStock');

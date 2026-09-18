@@ -1,5 +1,6 @@
 const citaModel = require('../models/cita.model');
 const { respuestaError } = require('../utils/manejarError');
+const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
 async function listar(req, res) {
   try {
@@ -52,7 +53,7 @@ async function crear(req, res) {
     return res.status(400).json({ mensaje: 'Paciente, propietario, veterinario, fecha y hora son obligatorios' });
   }
 
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = obtenerFechaHoyLocal();
   if (fecha < hoy) {
     return res.status(400).json({ mensaje: 'No se puede agendar una cita en una fecha anterior a hoy' });
   }
@@ -86,7 +87,7 @@ async function actualizar(req, res) {
     return res.status(400).json({ mensaje: 'Fecha, hora y veterinario son obligatorios' });
   }
 
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = obtenerFechaHoyLocal();
   if (fecha < hoy) {
     return res.status(400).json({ mensaje: 'No se puede modificar la cita a una fecha anterior a hoy' });
   }

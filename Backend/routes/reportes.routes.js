@@ -9,5 +9,6 @@ router.get('/ingresos', verificarToken, verificarRol(['Administrador']), reporte
 router.get('/gastos', verificarToken, verificarRol(['Administrador']), reporteController.gastos);
 router.get('/consultas', verificarToken, verificarRol(['Administrador', 'Veterinario']), reporteController.consultas);
 router.get('/productos-movimiento', verificarToken, verificarRol(['Administrador']), reporteController.productosMovimiento);
+router.get('/citas-estado', verificarToken, reporteController.citasEstado);
 
 module.exports = router;

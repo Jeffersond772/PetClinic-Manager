@@ -868,6 +868,83 @@ body.modo-oscuro ::-webkit-scrollbar-thumb:hover { background: #4a4d52; }
   justify-content: center;
 }
 
+/* ---- Tarjetas clickeables ---- */
+.tarjeta-kpi.clickeable {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta-kpi.clickeable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.tarjeta-grafico {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tarjeta-grafico:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+/* ---- Próximas citas de hoy ---- */
+.lista-proximas-citas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.item-proxima-cita {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background-color 0.15s;
+}
+
+.item-proxima-cita:hover {
+  background-color: #f4f7f6;
+}
+
+.item-proxima-cita .hora-cita {
+  background: #1d9e75;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.item-proxima-cita strong {
+  font-size: 13px;
+  color: #1d1d1d;
+  display: block;
+}
+
+.fila-item-compra {
+  display: grid;
+  grid-template-columns: 2fr 80px 100px 130px 30px;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.fila-item-compra select,
+.fila-item-compra input {
+  padding: 8px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+body.modo-oscuro .item-proxima-cita:hover { background-color: #2a2d33; }
+body.modo-oscuro .item-proxima-cita strong { color: #eaeaea; }
+
 /* ---- Modo oscuro: elementos de historia.html y cuentas.html ---- */
 body.modo-oscuro .resultados-autocompletar {
   background: #1c1e22;

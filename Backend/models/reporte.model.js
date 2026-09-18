@@ -105,4 +105,13 @@ async function resumenGeneral(desde, hasta) {
   };
 }
 
-module.exports = { ingresosPorPeriodo, gastosPorPeriodo, consultasPorPeriodo, productosMayorMovimiento, resumenGeneral };
+// Distribución de citas por estado en un período (para el dashboard)
+async function citasPorEstado(desde, hasta) {
+  const [rows] = await db.query(
+    `SELECT estado, COUNT(*) AS total FROM citas WHERE fecha BETWEEN ? AND ? GROUP BY estado`,
+    [desde, hasta]
+  );
+  return rows;
+}
+
+module.exports = { ingresosPorPeriodo, gastosPorPeriodo, consultasPorPeriodo, productosMayorMovimiento, resumenGeneral, citasPorEstado };

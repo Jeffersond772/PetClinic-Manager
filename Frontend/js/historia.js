@@ -210,8 +210,12 @@ document.getElementById('btnNuevoProcedimiento').addEventListener('click', () =>
   selectProductoProcedimiento.innerHTML = '<option value="">Ninguno / no aplica</option>' +
     productosDisponibles.map(p => `<option value="${p.id_producto}">${p.nombre} (disp: ${p.cantidad_disponible})</option>`).join('');
 
-  document.getElementById('fechaProcedimiento').value = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaProcedimiento').max = new Date().toISOString().split('T')[0];
+    const hoyLocal = (() => {
+    const f = new Date();
+    return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+  })();
+  document.getElementById('fechaProcedimiento').value = hoyLocal;
+  document.getElementById('fechaProcedimiento').max = hoyLocal;
   modalProcedimiento.classList.remove('oculto');
 });
 

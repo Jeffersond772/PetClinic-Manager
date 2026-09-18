@@ -1,5 +1,6 @@
 const historiaModel = require('../models/historia.model');
 const { respuestaError } = require('../utils/manejarError');
+const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
 // CU14
 async function obtenerHistoria(req, res) {

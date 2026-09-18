@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Compras</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Compras a proveedores</h2>
+        <button id="btnNuevaCompra" class="btn-primario">Nueva compra</button>
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th>Total</th>
+            <th>Registrado por</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaCompras"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Modal: Nueva compra -->
+  <div id="modalCompra" class="modal-overlay oculto">
+    <div class="modal-caja modal-grande">
+      <h3>Nueva compra</h3>
+      <form id="formCompra">
+        <label for="proveedorCompra">Proveedor</label>
+        <select id="proveedorCompra" required>
+          <option value="">Selecciona un proveedor</option>
+        </select>
+
+        <div class="separador-tratamientos">
+          <div class="encabezado-tratamientos">
+            <label>Productos comprados</label>
+            <button type="button" id="btnAgregarItemCompra" class="btn-icono">+ Producto</button>
+          </div>
+          <div id="listaItemsCompra"></div>
+        </div>
+
+        <p class="total-preview">Total: <strong id="totalCompra">$0</strong></p>
+        <p id="mensajeErrorCompra" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarCompra" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Registrar compra</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ver detalle -->
+  <div id="modalDetalleCompra" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3>Detalle de compra</h3>
+      <div id="contenidoDetalleCompra"></div>
+      <div class="modal-botones">
+        <button type="button" id="btnCerrarDetalleCompra" class="btn-secundario">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/compras.js"></script>
+</body>
+</html>

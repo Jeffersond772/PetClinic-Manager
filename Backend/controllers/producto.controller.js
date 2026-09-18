@@ -1,5 +1,6 @@
 const productoModel = require('../models/producto.model');
 const { respuestaError } = require('../utils/manejarError');
+const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
 async function listar(req, res) {
   try {
@@ -57,9 +58,6 @@ async function proximosAVencer(req, res) {
 }
 
 // CU04
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
-
-// CU04
 async function crear(req, res) {
   const { nombre, id_categoria, id_proveedor, precio, unidad_medida, stock_minimo, fecha_vencimiento, descripcion } = req.body;
 
@@ -67,7 +65,7 @@ async function crear(req, res) {
     return res.status(400).json({ mensaje: 'Nombre, categoría y precio son obligatorios' });
   }
     if (fecha_vencimiento) {
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = obtenerFechaHoyLocal();
     if (fecha_vencimiento < hoy) {
       return res.status(400).json({ mensaje: 'La fecha de vencimiento no puede ser anterior a hoy' });
     }
@@ -95,7 +93,7 @@ async function actualizar(req, res) {
   }
 
     if (fecha_vencimiento) {
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = obtenerFechaHoyLocal();
     if (fecha_vencimiento < hoy) {
       return res.status(400).json({ mensaje: 'La fecha de vencimiento no puede ser anterior a hoy' });
     }

@@ -1,4 +1,4 @@
-document.getElementById('fechaCita').min = new Date().toISOString().split('T')[0];
+document.getElementById('fechaCita').min = formatearFecha(new Date());
 const tablaCitas = document.getElementById('tablaCitas');
 const filtroDesde = document.getElementById('filtroDesde');
 const filtroHasta = document.getElementById('filtroHasta');

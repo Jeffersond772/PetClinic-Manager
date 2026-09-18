@@ -67,6 +67,7 @@ function pintarTabla(cuentas) {
       <td><button class="btn-icono" onclick="verDetalle(${c.id_cuenta})">Ver / Pagar</button></td>
     </tr>
   `).join('');
+    }
 
 // ==================== AUTOCOMPLETAR PROPIETARIO ====================
 
@@ -409,4 +410,3 @@ function abrirFacturaImprimible(cuenta) {
 // ---- Carga inicial ----
 cargarCatalogos();
 cargarCuentas();
-}

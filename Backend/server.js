@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./config/db');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
@@ -48,7 +49,8 @@ app.use('/api/cuentas', require('./routes/cuentas.routes'));
 app.use('/api/gastos', require('./routes/gastos.routes'));
 app.use('/api/servicios', require('./routes/servicios.routes'));
 app.use('/api/reportes', require('./routes/reportes.routes'));
-const rateLimit = require('express-rate-limit');
+app.use('/api/proveedores', require('./routes/proveedores.routes'));
+app.use('/api/compras', require('./routes/compras.routes'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -43,8 +43,12 @@ function pintarTabla(gastos) {
 
 document.getElementById('btnNuevoGasto').addEventListener('click', () => {
   formGasto.reset();
-  document.getElementById('fechaGasto').value = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaGasto').max = new Date().toISOString().split('T')[0];
+    const hoyLocal = (() => {
+    const f = new Date();
+    return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+  })();
+  document.getElementById('fechaGasto').value = hoyLocal;
+  document.getElementById('fechaGasto').max = hoyLocal;
   mensajeErrorGasto.textContent = '';
   modalGasto.classList.remove('oculto');
 });

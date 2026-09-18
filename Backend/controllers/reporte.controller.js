@@ -65,4 +65,15 @@ async function resumen(req, res) {
   }
 }
 
-module.exports = { ingresos, gastos, consultas, productosMovimiento, resumen };
+async function citasEstado(req, res) {
+  const rango = validarRango(req, res);
+  if (!rango) return;
+  try {
+    const datos = await reporteModel.citasPorEstado(rango.desde, rango.hasta);
+    res.json(datos);
+  } catch (error) {
+    respuestaError(res, error);
+  }
+}
+
+module.exports = { ingresos, gastos, consultas, productosMovimiento, resumen, citasEstado };

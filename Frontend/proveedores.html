@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetClinic Manager - Proveedores</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar">
+    <h1>PetClinic Manager</h1>
+    <div class="usuario-info">
+      <span id="nombreUsuario"></span>
+      <span id="rolUsuario" class="badge-rol"></span>
+      <button id="btnLogout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebarMenu"></nav>
+
+    <main class="contenido">
+      <div class="encabezado-seccion">
+        <h2>Proveedores</h2>
+        <button id="btnNuevoProveedor" class="btn-primario">Nuevo proveedor</button>
+      </div>
+
+      <table class="tabla-datos">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Contacto</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaProveedores"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <div id="modalProveedor" class="modal-overlay oculto">
+    <div class="modal-caja">
+      <h3 id="tituloModalProveedor">Nuevo proveedor</h3>
+      <form id="formProveedor">
+        <input type="hidden" id="idProveedor">
+
+        <label for="nombreProveedor">Nombre</label>
+        <input type="text" id="nombreProveedor" required>
+
+        <label for="contactoProveedor">Persona de contacto</label>
+        <input type="text" id="contactoProveedor">
+
+        <label for="telefonoProveedor">Teléfono</label>
+        <input type="text" id="telefonoProveedor">
+
+        <label for="correoProveedor">Correo</label>
+        <input type="email" id="correoProveedor">
+
+        <label for="direccionProveedor">Dirección</label>
+        <input type="text" id="direccionProveedor">
+
+        <p id="mensajeErrorProveedor" class="error-mensaje"></p>
+
+        <div class="modal-botones">
+          <button type="button" id="btnCancelarProveedor" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/proveedores.js"></script>
+</body>
+</html>

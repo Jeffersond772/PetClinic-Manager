@@ -1,5 +1,6 @@
 const gastoModel = require('../models/gasto.model');
 const { respuestaError } = require('../utils/manejarError');
+const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
 async function listar(req, res) {
   try {
@@ -32,7 +33,7 @@ async function crear(req, res) {
     return res.status(400).json({ mensaje: 'Concepto, monto y fecha son obligatorios' });
   }
 
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = obtenerFechaHoyLocal();
   if (fecha > hoy) {
     return res.status(400).json({ mensaje: 'La fecha del gasto no puede ser futura' });
   }

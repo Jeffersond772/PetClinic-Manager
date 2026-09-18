@@ -1,6 +1,14 @@
 const elSaludo = document.getElementById('saludo');
+
+function obtenerSaludoHora() {
+  const hora = new Date().getHours();
+  if (hora < 12) return 'Buenos días';
+  if (hora < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
 if (elSaludo) {
-  elSaludo.textContent = `Bienvenido, ${usuario.nombre}`;
+  elSaludo.textContent = `${obtenerSaludoHora()}, ${usuario.nombre}`;
 }
 
 function formatearFecha(fecha) {
@@ -12,16 +20,24 @@ function formatearFecha(fecha) {
 
 const tarjetasResumenDashboard = document.getElementById('tarjetasResumenDashboard');
 const elFechaHoy = document.getElementById('fechaHoy');
+const listaProximasCitas = document.getElementById('listaProximasCitas');
 
-// Solo corre el resto si estos elementos existen (es decir, si estamos en dashboard.html)
 if (tarjetasResumenDashboard) {
 
   const hoy = new Date();
   const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
   const desde = formatearFecha(inicioMes);
   const hasta = formatearFecha(hoy);
+  const hoyStr = formatearFecha(hoy);
 
   elFechaHoy.textContent = hoy.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const destinoTarjeta = {
+    ingresos: 'cuentas.html',
+    gastos: 'gastos.html',
+    citas: 'citas.html',
+    stock: 'productos.html'
+  };
 
   async function cargarResumenDashboard() {
     try {
@@ -37,32 +53,65 @@ if (tarjetasResumenDashboard) {
 
   function pintarTarjetasDashboard(r) {
     tarjetasResumenDashboard.innerHTML = `
-      <div class="tarjeta-kpi acento-verde" style="animation-delay:0s">
+      <div class="tarjeta-kpi acento-verde clickeable" style="animation-delay:0s" data-destino="${destinoTarjeta.ingresos}">
         <div class="valor-kpi">$${r.ingresos.toLocaleString()}</div>
         <div class="etiqueta-kpi">Ingresos del mes</div>
       </div>
-      <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.05s">
+      <div class="tarjeta-kpi acento-rojo clickeable" style="animation-delay:0.05s" data-destino="${destinoTarjeta.gastos}">
         <div class="valor-kpi">$${r.gastos.toLocaleString()}</div>
         <div class="etiqueta-kpi">Gastos del mes</div>
       </div>
-      <div class="tarjeta-kpi acento-azul" style="animation-delay:0.1s">
+      <div class="tarjeta-kpi acento-azul clickeable" style="animation-delay:0.1s" data-destino="${destinoTarjeta.citas}">
         <div class="valor-kpi">${r.citasAtendidas}</div>
         <div class="etiqueta-kpi">Citas atendidas</div>
       </div>
-      <div class="tarjeta-kpi acento-rojo" style="animation-delay:0.15s">
+      <div class="tarjeta-kpi acento-rojo clickeable" style="animation-delay:0.15s" data-destino="${destinoTarjeta.stock}">
         <div class="valor-kpi">${r.productosBajoStock}</div>
         <div class="etiqueta-kpi">Productos bajo stock</div>
       </div>
     `;
+
+    tarjetasResumenDashboard.querySelectorAll('.clickeable').forEach(tarjeta => {
+      tarjeta.addEventListener('click', () => {
+        window.location.href = tarjeta.dataset.destino;
+      });
+    });
   }
 
-  // Solo si Chart.js está disponible y hay permisos para reportes financieros detallados
-  async function cargarGraficosDashboard() {
-    if (usuario.rol !== 'Administrador' && usuario.rol !== 'Veterinario') return;
+  async function cargarProximasCitas() {
+    if (!listaProximasCitas) return;
+    try {
+      const respuesta = await fetch(`${API_URL}/api/citas/agenda?desde=${hoyStr}&hasta=${hoyStr}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const resultado = await respuesta.json();
+      const citas = (resultado.citas || []).filter(c => c.estado === 'programada');
 
+      if (citas.length === 0) {
+        listaProximasCitas.innerHTML = `<p class="texto-secundario">No hay citas programadas para hoy.</p>`;
+        return;
+      }
+
+      listaProximasCitas.innerHTML = citas.map(c => `
+        <div class="item-proxima-cita">
+          <span class="hora-cita">${c.hora}</span>
+          <div>
+            <strong>${escaparHTML(c.paciente)}</strong>
+            <p class="texto-secundario">${escaparHTML(c.propietario)} · Dr(a). ${escaparHTML(c.veterinario)}</p>
+          </div>
+        </div>
+      `).join('');
+
+    } catch (error) {
+      console.error('Error cargando próximas citas:', error);
+    }
+  }
+
+  async function cargarGraficosDashboard() {
     try {
       const promesas = [
-        fetch(`${API_URL}/api/reportes/consultas?desde=${desde}&hasta=${hasta}`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${API_URL}/api/reportes/consultas?desde=${desde}&hasta=${hasta}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_URL}/api/reportes/citas-estado?desde=${desde}&hasta=${hasta}`, { headers: { 'Authorization': `Bearer ${token}` } })
       ];
 
       if (usuario.rol === 'Administrador') {
@@ -74,35 +123,58 @@ if (tarjetasResumenDashboard) {
 
       const respuestas = await Promise.all(promesas);
       const consultas = await respuestas[0].json();
+      const citasEstado = await respuestas[1].json();
 
-      new Chart(document.getElementById('graficoConsultasDashboard'), {
-        type: 'bar',
-        data: {
-          labels: consultas.porDia.map(d => d.dia.split('-').slice(1).reverse().join('/')),
-          datasets: [{ label: 'Consultas', data: consultas.porDia.map(d => d.total), backgroundColor: '#1d5fa8', borderRadius: 6 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
-      });
-
-      if (usuario.rol === 'Administrador') {
-        const ingresos = await respuestas[1].json();
-        const gastos = await respuestas[2].json();
-        const dias = [...new Set([...ingresos.map(i => i.dia), ...gastos.map(g => g.dia)])].sort();
-
-        new Chart(document.getElementById('graficoFinancieroDashboard'), {
-          type: 'line',
+      const canvasConsultas = document.getElementById('graficoConsultasDashboard');
+      if (canvasConsultas) {
+        new Chart(canvasConsultas, {
+          type: 'bar',
           data: {
-            labels: dias.map(d => d.split('-').slice(1).reverse().join('/')),
-            datasets: [
-              { label: 'Ingresos', data: dias.map(d => Number(ingresos.find(i => i.dia === d)?.total || 0)), borderColor: '#1d9e75', backgroundColor: 'rgba(29,158,117,0.1)', fill: true, tension: 0.3 },
-              { label: 'Gastos', data: dias.map(d => Number(gastos.find(g => g.dia === d)?.total || 0)), borderColor: '#d64545', backgroundColor: 'rgba(214,69,69,0.1)', fill: true, tension: 0.3 }
-            ]
+            labels: consultas.porDia.map(d => d.dia.split('-').slice(1).reverse().join('/')),
+            datasets: [{ label: 'Consultas', data: consultas.porDia.map(d => d.total), backgroundColor: '#1d5fa8', borderRadius: 6 }]
           },
           options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
         });
+      }
+
+      const canvasCitasEstado = document.getElementById('graficoCitasEstado');
+      if (canvasCitasEstado) {
+        const coloresPorEstado = { programada: '#1d5fa8', atendida: '#1d9e75', cancelada: '#d64545', no_asistio: '#999999' };
+        new Chart(canvasCitasEstado, {
+          type: 'doughnut',
+          data: {
+            labels: citasEstado.map(c => c.estado.replace('_', ' ')),
+            datasets: [{
+              data: citasEstado.map(c => c.total),
+              backgroundColor: citasEstado.map(c => coloresPorEstado[c.estado] || '#ccc')
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
+        });
+      }
+
+      if (usuario.rol === 'Administrador') {
+        const ingresos = await respuestas[2].json();
+        const gastos = await respuestas[3].json();
+        const dias = [...new Set([...ingresos.map(i => i.dia), ...gastos.map(g => g.dia)])].sort();
+
+        const canvasFinanciero = document.getElementById('graficoFinancieroDashboard');
+        if (canvasFinanciero) {
+          new Chart(canvasFinanciero, {
+            type: 'line',
+            data: {
+              labels: dias.map(d => d.split('-').slice(1).reverse().join('/')),
+              datasets: [
+                { label: 'Ingresos', data: dias.map(d => Number(ingresos.find(i => i.dia === d)?.total || 0)), borderColor: '#1d9e75', backgroundColor: 'rgba(29,158,117,0.1)', fill: true, tension: 0.3 },
+                { label: 'Gastos', data: dias.map(d => Number(gastos.find(g => g.dia === d)?.total || 0)), borderColor: '#d64545', backgroundColor: 'rgba(214,69,69,0.1)', fill: true, tension: 0.3 }
+              ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
+          });
+        }
       } else {
-        // Empleado y Veterinario no ven el gráfico financiero: ocultamos su tarjeta
-        document.getElementById('graficoFinancieroDashboard').closest('.tarjeta-grafico').style.display = 'none';
+        const contenedorFinanciero = document.getElementById('graficoFinancieroDashboard');
+        if (contenedorFinanciero) contenedorFinanciero.closest('.tarjeta-grafico').style.display = 'none';
       }
 
     } catch (error) {
@@ -111,5 +183,6 @@ if (tarjetasResumenDashboard) {
   }
 
   cargarResumenDashboard();
+  cargarProximasCitas();
   cargarGraficosDashboard();
 }

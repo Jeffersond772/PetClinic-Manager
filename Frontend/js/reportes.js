@@ -2,7 +2,7 @@ const filtroDesde = document.getElementById('filtroDesde');
 const filtroHasta = document.getElementById('filtroHasta');
 const tarjetasResumen = document.getElementById('tarjetasResumen');
 
-let graficoFinanciero, graficoConsultas, graficoProductos;
+let graficoFinanciero, graficoConsultas, graficoProductos, graficoFlujoCaja;
 
 function formatearFecha(fecha) {
   const año = fecha.getFullYear();
@@ -38,6 +38,7 @@ async function cargarReportes() {
 
   pintarTarjetas(resumen);
   pintarGraficoFinanciero(ingresos, gastos);
+  pintarGraficoFlujoCaja(ingresos, gastos);
   pintarGraficoConsultas(consultas.porDia);
   pintarGraficoProductos(productos);
 }
@@ -90,6 +91,47 @@ function pintarGraficoFinanciero(ingresos, gastos) {
       datasets: [
         { label: 'Ingresos', data: datosIngresos, borderColor: '#1d9e75', backgroundColor: 'rgba(29,158,117,0.1)', fill: true, tension: 0.3 },
         { label: 'Gastos', data: datosGastos, borderColor: '#d64545', backgroundColor: 'rgba(214,69,69,0.1)', fill: true, tension: 0.3 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
+  });
+}
+
+function pintarGraficoFlujoCaja(ingresos, gastos) {
+  const dias = [...new Set([...ingresos.map(i => i.dia), ...gastos.map(g => g.dia)])].sort();
+  let acumulado = 0;
+  const netoDiario = [];
+  const saldoAcumulado = [];
+
+  dias.forEach(d => {
+    const ing = Number(ingresos.find(i => i.dia === d)?.total || 0);
+    const gas = Number(gastos.find(g => g.dia === d)?.total || 0);
+    const neto = ing - gas;
+    acumulado += neto;
+    netoDiario.push(neto);
+    saldoAcumulado.push(acumulado);
+  });
+
+  if (graficoFlujoCaja) graficoFlujoCaja.destroy();
+  graficoFlujoCaja = new Chart(document.getElementById('graficoFlujoCaja'), {
+    data: {
+      labels: dias.map(d => d.split('-').slice(1).reverse().join('/')),
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Flujo neto diario',
+          data: netoDiario,
+          backgroundColor: netoDiario.map(v => v >= 0 ? 'rgba(29,158,117,0.6)' : 'rgba(214,69,69,0.6)'),
+          borderRadius: 4
+        },
+        {
+          type: 'line',
+          label: 'Saldo acumulado',
+          data: saldoAcumulado,
+          borderColor: '#1d5fa8',
+          backgroundColor: 'transparent',
+          tension: 0.3
+        }
       ]
     },
     options: { responsive: true, maintainAspectRatio: false, animation: { duration: 700 } }
