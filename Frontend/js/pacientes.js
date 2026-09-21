@@ -133,6 +133,8 @@ inputPropietarioTexto.addEventListener('input', () => {
 
     if (resultados.length === 0) {
           resultadosPropietario.innerHTML = resultados.map(p => `
+            resultadosPropietario.innerHTML = '<div class="resultado-item">Sin resultados</div>';
+} else {
         <div class="resultado-item" onclick="seleccionarPropietario(${p.id_propietario}, '${p.nombre.replace(/'/g, "\\'")}')">
           ${escaparHTML(p.nombre)}
           <small>${escaparHTML(p.identificacion) || 'Sin identificación'}</small>
