@@ -11,5 +11,6 @@ router.get('/:id', verificarToken, propietarioController.obtener);
 // Crear y actualizar: Administrador y Empleado (según la funcionalidad del documento)
 router.post('/', verificarToken, verificarRol(['Administrador', 'Empleado']), propietarioController.crear);
 router.put('/:id', verificarToken, verificarRol(['Administrador', 'Empleado']), propietarioController.actualizar);
+router.patch('/:id/estado', verificarToken, verificarRol(['Administrador']), propietarioController.cambiarEstado);
 
 module.exports = router;

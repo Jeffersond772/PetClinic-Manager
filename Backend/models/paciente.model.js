@@ -9,6 +9,7 @@ async function listar() {
      JOIN especies e ON e.id_especie = p.id_especie
      LEFT JOIN razas r ON r.id_raza = p.id_raza
      JOIN propietarios pr ON pr.id_propietario = p.id_propietario
+     WHERE pr.estado = 'activo'
      ORDER BY p.nombre`
   );
   return rows;
@@ -39,7 +40,7 @@ async function buscar(termino) {
      FROM pacientes p
      JOIN especies e ON e.id_especie = p.id_especie
      JOIN propietarios pr ON pr.id_propietario = p.id_propietario
-     WHERE p.nombre LIKE ? OR pr.nombre LIKE ? OR pr.identificacion LIKE ?
+     WHERE (p.nombre LIKE ? OR pr.nombre LIKE ? OR pr.identificacion LIKE ?) AND pr.estado = 'activo'
      ORDER BY p.nombre
      LIMIT 20`,
     [like, like, like]

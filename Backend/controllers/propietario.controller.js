@@ -3,7 +3,8 @@ const { respuestaError } = require('../utils/manejarError');
 
 async function listar(req, res) {
   try {
-    const propietarios = await propietarioModel.listar();
+    const estado = req.query.estado === 'inactivo' ? 'inactivo' : 'activo';
+const propietarios = await propietarioModel.listar(estado);
     res.json(propietarios);
   } catch (error) {
     respuestaError(res, error);
@@ -31,8 +32,29 @@ async function buscar(req, res) {
   }
 
   try {
-    const resultados = await propietarioModel.buscar(termino);
+    const estado = req.query.estado === 'inactivo' ? 'inactivo' : 'activo';
+const resultados = await propietarioModel.buscar(termino, estado);
     res.json(resultados);
+  } catch (error) {
+    respuestaError(res, error);
+  }
+}
+
+async function cambiarEstado(req, res) {
+  const { estado } = req.body;
+
+  if (!['activo', 'inactivo'].includes(estado)) {
+    return res.status(400).json({ mensaje: 'Estado no válido' });
+  }
+
+  try {
+    const propietario = await propietarioModel.obtenerPorId(req.params.id);
+    if (!propietario) {
+      return res.status(404).json({ mensaje: 'Propietario no encontrado' });
+    }
+
+    await propietarioModel.cambiarEstado(req.params.id, estado);
+    res.json({ mensaje: estado === 'inactivo' ? 'Propietario desactivado' : 'Propietario reactivado' });
   } catch (error) {
     respuestaError(res, error);
   }
@@ -77,4 +99,4 @@ async function actualizar(req, res) {
   }
 }
 
-module.exports = { listar, obtener, buscar, crear, actualizar };
+module.exports = { listar, obtener, buscar, crear, actualizar, cambiarEstado };

@@ -1,3 +1,5 @@
+const chkInactivos = document.getElementById('chkInactivos');
+const estadoActual = () => chkInactivos.checked ? 'inactivo' : 'activo';
 const tablaPropietarios = document.getElementById('tablaPropietarios');
 const inputBuscar = document.getElementById('inputBuscar');
 const modal = document.getElementById('modalPropietario');
@@ -11,7 +13,7 @@ let propietarios = []; // caché local de la última lista cargada
 async function cargarPropietarios() {
   mostrarCargando(tablaPropietarios, 6);
   try {
-    const respuesta = await fetch(`${API_URL}/api/propietarios`, {
+    const respuesta = await fetch(`${API_URL}/api/propietarios?estado=${estadoActual()}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
@@ -35,14 +37,16 @@ function pintarTabla(lista) {
     return;
   }
 
-    tablaPropietarios.innerHTML = lista.map(p => `
+  tablaPropietarios.innerHTML = lista.map(p => `
     <tr>
       <td>${escaparHTML(p.nombre)}</td>
       <td>${escaparHTML(p.identificacion) || '-'}</td>
       <td>${escaparHTML(p.telefono) || '-'}</td>
       <td>${escaparHTML(p.correo) || '-'}</td>
       <td><button class="btn-icono" onclick="verMascotas(${p.id_propietario})">Ver mascotas</button></td>
-      <td><button class="btn-icono" onclick="editarPropietario(${p.id_propietario})">Editar</button></td>
+      <td><button class="btn-icono" onclick="editarPropietario(${p.id_propietario})">Editar</button>
+      ${usuario.rol === 'Administrador' ? `<button class="btn-icono" onclick="cambiarEstado(${p.id_propietario}, '${p.estado === 'activo' ? 'inactivo' : 'activo'}')">${p.estado === 'activo' ? 'Desactivar' : 'Reactivar'}</button>` : ''}
+      </td>
     </tr>
   `).join('');
 }
@@ -64,7 +68,7 @@ inputBuscar.addEventListener('input', () => {
     }
 
     try {
-      const respuesta = await fetch(`${API_URL}/api/propietarios/buscar?q=${encodeURIComponent(termino)}`, {
+      const respuesta = await fetch(`${API_URL}/api/propietarios/buscar?q=${encodeURIComponent(termino)}&estado=${estadoActual()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const resultados = await respuesta.json();
@@ -148,6 +152,28 @@ formPropietario.addEventListener('submit', async (e) => {
     mensajeErrorModal.textContent = 'No se pudo conectar con el servidor';
     console.error(error);
   }
+});
+
+async function cambiarEstado(id, estado) {
+  const desactivar = estado === 'inactivo';
+  const aviso = desactivar
+    ? '¿Desactivar este propietario? Sus mascotas dejarán de aparecer, pero el historial y los pagos se conservan.'
+    : '¿Reactivar este propietario?';
+  if (!confirm(aviso)) return;
+
+  const respuesta = await fetch(`${API_URL}/api/propietarios/${id}/estado`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ estado })
+  });
+  const resultado = await respuesta.json();
+  if (!respuesta.ok) { alert(resultado.mensaje || 'Ocurrió un error'); return; }
+  cargarPropietarios();
+}
+
+chkInactivos.addEventListener('change', () => {
+  inputBuscar.value = '';
+  cargarPropietarios();
 });
 
 // ---- Carga inicial ----
