@@ -1055,6 +1055,102 @@ body.modo-oscuro ::-webkit-scrollbar-thumb:hover { background: #4a4d52; }
   navigation: none;
 }
 
+/* ============================================
+   Interactividad y animaciones (nuevo)
+   ============================================ */
+
+/* --- Botones: efecto de elevación al pasar el mouse --- */
+.btn-primario,
+.btn-secundario {
+  transition: background-color 0.2s, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primario:hover,
+.btn-secundario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.btn-primario:active,
+.btn-secundario:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* --- Tarjetas (KPI y gráficos): elevación al pasar el mouse --- */
+.tarjeta-kpi,
+.tarjeta-grafico {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tarjeta-kpi:hover,
+.tarjeta-grafico:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+body.modo-oscuro .tarjeta-kpi:hover,
+body.modo-oscuro .tarjeta-grafico:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+}
+
+/* --- Entrada animada de tarjetas al cargar la página --- */
+@keyframes entradaTarjeta {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tarjeta-kpi,
+.tarjeta-grafico {
+  animation: entradaTarjeta 0.4s ease both;
+}
+
+.tarjeta-kpi:nth-child(2) { animation-delay: 0.05s; }
+.tarjeta-kpi:nth-child(3) { animation-delay: 0.10s; }
+.tarjeta-kpi:nth-child(4) { animation-delay: 0.15s; }
+
+/* --- Sidebar: indicador deslizante al pasar el mouse --- */
+.sidebar a {
+  position: relative;
+  border-left: 3px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease, border-left-color 0.2s ease;
+}
+
+.sidebar a:hover {
+  padding-left: 28px;
+  border-left-color: #1d9e75;
+}
+
+body.modo-oscuro .sidebar a:hover {
+  border-left-color: #3ecf99;
+}
+
+/* --- Filas de tabla: aparición en cascada cada vez que se recarga --- */
+@keyframes entradaFila {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.tabla-datos tbody tr {
+  animation: entradaFila 0.3s ease both;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.tabla-datos tbody tr:hover {
+  transform: scale(1.004);
+}
+
+.tabla-datos tbody tr:nth-child(1)  { animation-delay: 0.02s; }
+.tabla-datos tbody tr:nth-child(2)  { animation-delay: 0.04s; }
+.tabla-datos tbody tr:nth-child(3)  { animation-delay: 0.06s; }
+.tabla-datos tbody tr:nth-child(4)  { animation-delay: 0.08s; }
+.tabla-datos tbody tr:nth-child(5)  { animation-delay: 0.10s; }
+.tabla-datos tbody tr:nth-child(6)  { animation-delay: 0.12s; }
+.tabla-datos tbody tr:nth-child(7)  { animation-delay: 0.14s; }
+.tabla-datos tbody tr:nth-child(8)  { animation-delay: 0.16s; }
+.tabla-datos tbody tr:nth-child(9)  { animation-delay: 0.18s; }
+.tabla-datos tbody tr:nth-child(10) { animation-delay: 0.20s; }
+
 body.modo-oscuro .calendario-container { background: #23262b; }
 body.modo-oscuro .calendario-header h3 { color: #eaeaea; }
 body.modo-oscuro .dia-calendario { border-color: #303338; }

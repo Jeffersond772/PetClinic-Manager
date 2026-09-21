@@ -5,6 +5,7 @@ const db = require('./config/db');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+  app.set('trust proxy', 1);
 
 // Middlewares
 const origenesPermitidos = process.env.FRONTEND_URL
@@ -32,6 +33,7 @@ app.get('/test-db', async (req, res) => {
 const limitadorLogin = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 5, // máximo 5 intentos
+  skipSuccessfulRequests: true, // solo cuenta intentos fallidos (contraseña/usuario incorrectos)
   message: { mensaje: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false

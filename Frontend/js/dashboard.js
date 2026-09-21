@@ -148,7 +148,8 @@ if (tarjetasResumenDashboard) {
       let indiceSiguiente = 1;
 
       if (puedeVerConsultas) {
-        const consultas = await respuestas[indiceSiguiente].json();
+                const consultas = await respuestas[indiceSiguiente].json();
+        consultas.porDia.forEach(d => { d.dia = d.dia.slice(0, 10); });
         indiceSiguiente++;
 
         const canvasConsultas = document.getElementById('graficoConsultasDashboard');
@@ -168,8 +169,10 @@ if (tarjetasResumenDashboard) {
       }
 
       if (usuario.rol === 'Administrador') {
-        const ingresos = await respuestas[indiceSiguiente].json();
+                const ingresos = await respuestas[indiceSiguiente].json();
         const gastos = await respuestas[indiceSiguiente + 1].json();
+        ingresos.forEach(i => { i.dia = i.dia.slice(0, 10); });
+        gastos.forEach(g => { g.dia = g.dia.slice(0, 10); });
         const dias = [...new Set([...ingresos.map(i => i.dia), ...gastos.map(g => g.dia)])].sort();
 
         const canvasFinanciero = document.getElementById('graficoFinancieroDashboard');
