@@ -8,9 +8,83 @@
 body {
   min-height: 100vh;
   display: flex;
+}
+
+/* ---- Login: panel visual (izquierda) ---- */
+.login-visual {
+  flex: 1.1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #16543d 0%, #1d9e75 55%, #3ecf99 100%);
+  color: #ffffff;
+  padding: 40px;
+}
+
+.login-visual-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  opacity: 0.18;
+  animation: flotar 7s ease-in-out infinite;
+}
+
+.blob-a { width: 260px; height: 260px; top: -60px; left: -60px; }
+.blob-b { width: 200px; height: 200px; bottom: -50px; right: -30px; animation-delay: 1.5s; }
+
+.login-visual-paws {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image: radial-gradient(circle, #ffffff 2px, transparent 2.5px);
+  background-size: 34px 34px;
+}
+
+.login-visual-contenido {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login-visual-icono {
+  font-size: 44px;
+  display: inline-block;
+  margin-bottom: 18px;
+}
+
+.login-visual-contenido h2 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 14px;
+}
+
+.login-visual-contenido p {
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+@keyframes flotar {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-18px) scale(1.05); }
+}
+
+/* ---- Login: panel del formulario (derecha) ---- */
+.login-panel {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #e8f4f0 0%, #d4e9e2 100%);
+  padding: 30px;
+}
+
+@media (max-width: 860px) {
+  .login-visual { display: none; }
 }
 
 .login-container {
@@ -21,7 +95,7 @@ body {
   width: 100%;
   max-width: 380px;
   text-align: center;
-    opacity: 0;
+  opacity: 0;
   animation: aparecer 0.5s ease forwards;
 }
 
@@ -1211,4 +1285,55 @@ body.modo-oscuro .alerta-vencimiento {
 
 body.modo-oscuro .tabla-datos tbody tr:hover {
   background-color: #282b31;
+}
+
+
+/* ==== EXTRA: modo oscuro para el login dividido ==== */
+body.modo-oscuro .login-panel {
+  background: #16181c;
+}
+body.modo-oscuro .login-visual {
+  background: linear-gradient(150deg, #0f3c2b 0%, #14523c 55%, #1d9e75 100%);
+}
+
+/* ==== EXTRA: mejoras visuales generales ==== */
+.btn-primario {
+  background: linear-gradient(135deg, #1d9e75 0%, #17825f 100%);
+  box-shadow: 0 2px 8px rgba(29, 158, 117, 0.25);
+  transition: background-color 0.2s, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-primario:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 158, 117, 0.35);
+}
+.btn-primario:active,
+.btn-secundario:active {
+  transform: scale(0.97);
+}
+
+.topbar {
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1d9e75, #3ecf99, #1d9e75);
+  background-size: 200% 100%;
+  animation: brillo 6s linear infinite;
+}
+@keyframes brillo {
+  to { background-position: 200% 0; }
+}
+
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+}
+
+.badge-rol {
+  background: linear-gradient(135deg, #e8f4f0, #d4e9e2);
+}
+body.modo-oscuro .badge-rol {
+  background: linear-gradient(135deg, #1d3a30, #16302a);
 }

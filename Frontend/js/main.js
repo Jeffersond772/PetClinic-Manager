@@ -1,6 +1,27 @@
 const loginForm = document.getElementById('loginForm');
 const mensajeError = document.getElementById('mensajeError');
 
+// ---- Si ya hay una sesión activa y válida, no mostrar el login ----
+function tokenEstaExpirado(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload.exp) return false;
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
+function verificarSesionExistente() {
+  const token = localStorage.getItem('token');
+  if (token && !tokenEstaExpirado(token)) {
+    window.location.replace('dashboard.html');
+  }
+}
+
+verificarSesionExistente();
+window.addEventListener('pageshow', verificarSesionExistente);
+
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault(); // evita que la página se recargue
 
@@ -19,20 +40,16 @@ loginForm.addEventListener('submit', async (e) => {
     const datos = await respuesta.json();
 
     if (!respuesta.ok) {
-      // El servidor respondió pero con error (ej. credenciales inválidas)
       mensajeError.textContent = datos.mensaje || 'Correo o contraseña incorrectos';
       return;
     }
 
-    // Login exitoso: guardamos el token y los datos del usuario
     localStorage.setItem('token', datos.token);
     localStorage.setItem('usuario', JSON.stringify(datos.usuario));
 
-    // Redirigimos al dashboard (lo crearemos más adelante)
-    window.location.href = 'dashboard.html';
+    window.location.replace('dashboard.html');
 
   } catch (error) {
-    // Esto captura errores de red (ej. la API no está corriendo)
     mensajeError.textContent = 'No se pudo conectar con el servidor';
     console.error(error);
   }

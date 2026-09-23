@@ -1,11 +1,13 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const db = require('./config/db');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
   app.set('trust proxy', 1);
+  app.use(helmet());
 
 // Middlewares
 const origenesPermitidos = process.env.FRONTEND_URL

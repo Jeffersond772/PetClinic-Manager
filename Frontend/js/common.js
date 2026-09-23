@@ -6,15 +6,47 @@ function escaparHTML(texto) {
   return div.innerHTML;
 }
 
-// Protección de todas las páginas internas: si no hay sesión, fuera
+// ---- Seguridad: valida si el token JWT ya expiró (revisa el campo "exp") ----
+function tokenEstaExpirado(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload.exp) return false;
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
+// Protección de todas las páginas internas: si no hay sesión o expiró, fuera
 const token = localStorage.getItem('token');
 const usuarioGuardado = localStorage.getItem('usuario');
 
-if (!token || !usuarioGuardado) {
-  window.location.href = 'index.html';
+if (!token || !usuarioGuardado || tokenEstaExpirado(token)) {
+  localStorage.removeItem('token');
+  localStorage.removeItem('usuario');
+  window.location.replace('index.html');
 }
 
-const usuario = JSON.parse(usuarioGuardado);
+const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
+
+// ---- Seguridad: si el navegador restaura esta página desde su caché
+// (botón Atrás/Adelante tras cerrar sesión), revalida la sesión al instante ----
+window.addEventListener('pageshow', function (event) {
+  const tokenActual = localStorage.getItem('token');
+  if (event.persisted && (!tokenActual || tokenEstaExpirado(tokenActual))) {
+    window.location.replace('index.html');
+  }
+});
+
+// ---- Cierra la sesión sola si el token expira mientras el usuario navega ----
+setInterval(() => {
+  const tokenActual = localStorage.getItem('token');
+  if (tokenActual && tokenEstaExpirado(tokenActual)) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.replace('index.html');
+  }
+}, 60000);
 
 // ---- Elementos comunes del layout (pueden no existir en todas las páginas) ----
 const elNombreUsuario = document.getElementById('nombreUsuario');
@@ -91,7 +123,7 @@ if (elBtnLogout) {
   elBtnLogout.addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
-    window.location.href = 'index.html';
+     window.location.replace('index.html');
   });
 }
 
