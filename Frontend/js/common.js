@@ -54,33 +54,39 @@ const elRolUsuario = document.getElementById('rolUsuario');
 const elSidebar = document.getElementById('sidebarMenu');
 const elBtnLogout = document.getElementById('btnLogout');
 
-if (elNombreUsuario) elNombreUsuario.textContent = usuario.nombre;
+if (elNombreUsuario) {
+  elNombreUsuario.textContent = usuario.nombre;
+  const avatar = document.createElement('span');
+  avatar.className = 'avatar-usuario';
+  avatar.textContent = (usuario.nombre || '?').trim().charAt(0).toUpperCase();
+  elNombreUsuario.parentNode.insertBefore(avatar, elNombreUsuario);
+}
 if (elRolUsuario) elRolUsuario.textContent = usuario.rol;
 
 // ---- Menú lateral según el rol (CU22) ----
 const menusPorRol = {
   Administrador: [
-    { texto: 'Usuarios', href: 'usuarios.html' },
-    { texto: 'Propietarios', href: 'propietarios.html' },
-    { texto: 'Pacientes', href: 'pacientes.html' },
-    { texto: 'Inventario', href: 'productos.html' },
-    { texto: 'Proveedores', href: 'proveedores.html' },
-    { texto: 'Compras', href: 'compras.html' },
-    { texto: 'Servicios', href: 'servicios.html' },
-    { texto: 'Citas', href: 'citas.html' },
-    { texto: 'Ventas', href: 'cuentas.html' },
-    { texto: 'Gastos', href: 'gastos.html' },  // solo en el menú de Administrador
-    { texto: 'Reportes', href: 'reportes.html' }
+    { texto: 'Usuarios', href: 'usuarios.html', icono: '👤' },
+    { texto: 'Propietarios', href: 'propietarios.html', icono: '🧑‍🤝‍🧑' },
+    { texto: 'Pacientes', href: 'pacientes.html', icono: '🐾' },
+    { texto: 'Inventario', href: 'productos.html', icono: '📦' },
+    { texto: 'Proveedores', href: 'proveedores.html', icono: '🚚' },
+    { texto: 'Compras', href: 'compras.html', icono: '🛒' },
+    { texto: 'Servicios', href: 'servicios.html', icono: '🩺' },
+    { texto: 'Citas', href: 'citas.html', icono: '📅' },
+    { texto: 'Ventas', href: 'cuentas.html', icono: '💳' },
+    { texto: 'Gastos', href: 'gastos.html', icono: '💸' },  // solo en el menú de Administrador
+    { texto: 'Reportes', href: 'reportes.html', icono: '📊' }
   ],
   Veterinario: [
-    { texto: 'Pacientes', href: 'pacientes.html' },
-    { texto: 'Citas', href: 'citas.html' },
+    { texto: 'Pacientes', href: 'pacientes.html', icono: '🐾' },
+    { texto: 'Citas', href: 'citas.html', icono: '📅' },
   ],
   Empleado: [
-    { texto: 'Propietarios', href: 'propietarios.html' },
-    { texto: 'Pacientes', href: 'pacientes.html' },
-    { texto: 'Citas', href: 'citas.html' },
-    { texto: 'Ventas', href: 'cuentas.html' },
+    { texto: 'Propietarios', href: 'propietarios.html', icono: '🧑‍🤝‍🧑' },
+    { texto: 'Pacientes', href: 'pacientes.html', icono: '🐾' },
+    { texto: 'Citas', href: 'citas.html', icono: '📅' },
+    { texto: 'Ventas', href: 'cuentas.html', icono: '💳' },
   ]
 };
 
@@ -89,7 +95,7 @@ if (elSidebar) {
   opciones.forEach(opcion => {
     const link = document.createElement('a');
     link.href = opcion.href;
-    link.textContent = opcion.texto;
+    link.innerHTML = `<span class="menu-icono">${opcion.icono}</span> ${opcion.texto}`;
     elSidebar.appendChild(link);
   });
 }

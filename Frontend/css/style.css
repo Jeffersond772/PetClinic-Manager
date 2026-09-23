@@ -1337,3 +1337,142 @@ input:focus, select:focus, textarea:focus {
 body.modo-oscuro .badge-rol {
   background: linear-gradient(135deg, #1d3a30, #16302a);
 }
+
+
+/* ==== EXTRA 2: login mucho más animado e interactivo ==== */
+
+.toggle-modo-login {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.85);
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.toggle-modo-login:hover { transform: scale(1.08) rotate(-8deg); }
+body.modo-oscuro .toggle-modo-login { background: rgba(30,33,38,0.85); }
+
+.blob-c { width: 150px; height: 150px; top: 40%; right: 15%; animation-delay: 3s; }
+
+.login-visual-paws { position: absolute; inset: 0; pointer-events: none; }
+.paw {
+  position: absolute;
+  font-size: 26px;
+  opacity: 0.25;
+  animation: flotarHuella linear infinite;
+}
+.p1 { top: 12%; left: 15%; animation-duration: 9s; }
+.p2 { top: 70%; left: 8%;  animation-duration: 12s; animation-delay: 1s; }
+.p3 { top: 25%; right: 12%; animation-duration: 10s; animation-delay: 2s; }
+.p4 { top: 55%; right: 22%; animation-duration: 14s; animation-delay: 0.5s; }
+.p5 { top: 85%; left: 45%; animation-duration: 11s; animation-delay: 3s; }
+
+@keyframes flotarHuella {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  50%  { transform: translateY(-30px) rotate(12deg); opacity: 0.35; }
+  100% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+}
+
+.login-logo {
+  display: inline-block;
+  font-size: 34px;
+  margin-bottom: 6px;
+  animation: rebote 0.6s ease;
+}
+@keyframes rebote {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.login-visual-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 22px;
+}
+.chip {
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(4px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  opacity: 0;
+  animation: aparecer 0.5s ease forwards;
+}
+.login-visual-chips .chip:nth-child(1) { animation-delay: 0.3s; }
+.login-visual-chips .chip:nth-child(2) { animation-delay: 0.45s; }
+.login-visual-chips .chip:nth-child(3) { animation-delay: 0.6s; }
+.login-visual-chips .chip:nth-child(4) { animation-delay: 0.75s; }
+
+.campo-icono {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.campo-icono-simbolo {
+  position: absolute;
+  left: 12px;
+  font-size: 14px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.campo-icono input { padding-left: 36px; }
+.campo-icono-password input { padding-right: 34px; }
+.campo-icono-toggle {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px;
+  margin: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.campo-icono-toggle:hover { opacity: 1; transform: scale(1.1); }
+
+button#btnLogin.cargando { opacity: 0.85; cursor: wait; }
+.spinner-boton { border-color: rgba(255,255,255,0.4); border-top-color: #ffffff; }
+
+.error-mensaje.sacudir { animation: sacudida 0.4s ease; }
+@keyframes sacudida {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+
+/* ==== EXTRA 3: avatar del usuario e iconos del menú ==== */
+.avatar-usuario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d9e75, #3ecf99);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  margin-right: 4px;
+}
+
+.menu-icono { margin-right: 8px; }
+
+.topbar h1 { transition: transform 0.15s ease; }
+.topbar h1:hover { transform: scale(1.03); }
+
+.contenido { animation: aparecer 0.4s ease; }
