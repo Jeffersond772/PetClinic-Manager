@@ -1476,3 +1476,125 @@ button#btnLogin.cargando { opacity: 0.85; cursor: wait; }
 .topbar h1:hover { transform: scale(1.03); }
 
 .contenido { animation: aparecer 0.4s ease; }
+
+
+/* ==== EXTRA 4: pulido general — más vida en toda la app ==== */
+
+html { scroll-behavior: smooth; }
+
+/* --- Topbar tipo "vidrio" con título en degradado --- */
+.topbar {
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+body.modo-oscuro .topbar { background: rgba(22,24,28,0.8); }
+
+.topbar h1 {
+  background: linear-gradient(135deg, #1d9e75, #17825f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+body.modo-oscuro .topbar h1 {
+  background: linear-gradient(135deg, #3ecf99, #1d9e75);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* --- Sidebar: fondo con leve degradado y entrada escalonada de los links --- */
+.sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+}
+body.modo-oscuro .sidebar {
+  background: linear-gradient(180deg, #1c1e22 0%, #17191d 100%);
+}
+
+.sidebar a {
+  opacity: 0;
+  animation: entradaLateral 0.35s ease forwards;
+}
+.sidebar a:nth-child(1)  { animation-delay: 0.03s; }
+.sidebar a:nth-child(2)  { animation-delay: 0.06s; }
+.sidebar a:nth-child(3)  { animation-delay: 0.09s; }
+.sidebar a:nth-child(4)  { animation-delay: 0.12s; }
+.sidebar a:nth-child(5)  { animation-delay: 0.15s; }
+.sidebar a:nth-child(6)  { animation-delay: 0.18s; }
+.sidebar a:nth-child(7)  { animation-delay: 0.21s; }
+.sidebar a:nth-child(8)  { animation-delay: 0.24s; }
+.sidebar a:nth-child(9)  { animation-delay: 0.27s; }
+.sidebar a:nth-child(10) { animation-delay: 0.30s; }
+.sidebar a:nth-child(11) { animation-delay: 0.33s; }
+
+@keyframes entradaLateral {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.menu-icono { display: inline-block; transition: transform 0.2s ease; }
+.sidebar a:hover .menu-icono { transform: scale(1.2) rotate(-8deg); }
+
+/* --- Botones: efecto de onda al hacer clic (sin necesitar JS) --- */
+.btn-primario, .btn-secundario {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primario::after, .btn-secundario::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.4s ease, height 0.4s ease, opacity 0.6s ease;
+}
+.btn-primario:active::after, .btn-secundario:active::after {
+  width: 220px;
+  height: 220px;
+  opacity: 1;
+  transition: 0s;
+}
+
+/* --- Tarjetas KPI: franja de acento superior --- */
+.tarjeta-kpi {
+  position: relative;
+  overflow: hidden;
+}
+.tarjeta-kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1d9e75, #3ecf99);
+}
+
+/* --- Tablas: encabezado fijo al hacer scroll, filas cebra y hover más marcado --- */
+.tabla-datos thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.tabla-datos tbody tr:nth-child(even) { background: rgba(29,158,117,0.03); }
+.tabla-datos tbody tr:hover { background-color: #eafaf4 !important; }
+
+body.modo-oscuro .tabla-datos tbody tr:nth-child(even) { background: rgba(62,207,153,0.04); }
+body.modo-oscuro .tabla-datos tbody tr:hover { background-color: #223b31 !important; }
+
+/* --- Modales: fondo con desenfoque --- */
+.modal-overlay {
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* --- Accesibilidad: anillo de foco visible y elegante --- */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #1d9e75;
+  outline-offset: 2px;
+}
+body.modo-oscuro button:focus-visible,
+body.modo-oscuro a:focus-visible {
+  outline-color: #3ecf99;
+}
