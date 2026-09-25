@@ -53,14 +53,18 @@ async function listarPorRangoFecha(fechaInicio, fechaFin, id_veterinario) {
   return rows;
 }
 
-// RF8: verificar si el veterinario ya tiene una cita activa en ese horario
+// RF8: verificar si el veterinario ya tiene una cita cerca de ese horario
+// (evita agendar dos citas demasiado seguidas, no solo a la misma hora exacta)
 async function existeConflictoHorario(id_veterinario, fecha, hora, id_cita_excluir) {
+  const DURACION_MINIMA_MINUTOS = 30; // ajusta esto si tus consultas duran más o menos
+
   let sql = `
     SELECT id_cita FROM citas
-    WHERE id_veterinario = ? AND fecha = ? AND hora = ?
+    WHERE id_veterinario = ? AND fecha = ?
       AND estado IN ('programada', 'atendida')
+      AND ABS(TIMESTAMPDIFF(MINUTE, hora, ?)) < ?
   `;
-  const parametros = [id_veterinario, fecha, hora];
+  const parametros = [id_veterinario, fecha, hora, DURACION_MINIMA_MINUTOS];
 
   if (id_cita_excluir) {
     sql += ` AND id_cita != ?`;
