@@ -59,7 +59,7 @@ async function obtener(req, res) {
 
 // CU03: actualizar usuario
 async function actualizar(req, res) {
-  const { nombre, correo, telefono, id_rol } = req.body;
+  const { nombre, correo, telefono, id_rol, hora_inicio_laboral, hora_fin_laboral } = req.body;
 
   try {
     const usuario = await usuarioModel.obtenerPorId(req.params.id);
@@ -67,7 +67,7 @@ async function actualizar(req, res) {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
 
-    await usuarioModel.actualizarUsuario(req.params.id, { nombre, correo, telefono, id_rol });
+    await usuarioModel.actualizarUsuario(req.params.id, { nombre, correo, telefono, id_rol, hora_inicio_laboral, hora_fin_laboral });
     res.json({ mensaje: 'Usuario actualizado correctamente' });
 
     } catch (error) {
