@@ -23,16 +23,28 @@ function formatearFecha(fecha) {
   return `${año}-${mes}-${dia}`;
 }
 // ---- Cargar veterinarios en los selects (filtro y modal) ----
+let veterinariosCache = [];
+
 async function cargarVeterinarios() {
   const respuesta = await fetch(`${API_URL}/api/catalogos/veterinarios`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  const veterinarios = await respuesta.json();
+  veterinariosCache = await respuesta.json();
 
-  const opciones = veterinarios.map(v => `<option value="${v.id_usuario}">${v.nombre}</option>`).join('');
+  const opciones = veterinariosCache.map(v => `<option value="${v.id_usuario}">${v.nombre}</option>`).join('');
   filtroVeterinario.innerHTML = '<option value="">Todos</option>' + opciones;
   selectVeterinario.innerHTML = '<option value="">Selecciona un veterinario</option>' + opciones;
+
+  document.getElementById('grupoForzarHorario').classList.toggle('oculto', usuario.rol !== 'Administrador');
 }
+
+selectVeterinario.addEventListener('change', () => {
+  const vet = veterinariosCache.find(v => v.id_usuario == selectVeterinario.value);
+  const hint = document.getElementById('horarioLaboralHint');
+  hint.textContent = (vet && vet.hora_inicio_laboral && vet.hora_fin_laboral)
+    ? `Horario laboral: ${vet.hora_inicio_laboral.slice(0,5)} - ${vet.hora_fin_laboral.slice(0,5)}`
+    : '';
+});
 
 // ---- Cargar agenda según filtros ----
 async function cargarAgenda() {
@@ -167,6 +179,7 @@ async function seleccionarPropietario(id, nombre) {
 document.getElementById('btnNuevaCita').addEventListener('click', () => {
   formCita.reset();
   document.getElementById('idCita').value = '';
+  document.getElementById('horarioLaboralHint').textContent = '';
   inputPropietarioId.value = '';
   selectPaciente.innerHTML = '<option value="">Primero selecciona un propietario</option>';
   tituloModalCita.textContent = 'Agendar cita';
@@ -224,7 +237,8 @@ formCita.addEventListener('submit', async (e) => {
     id_veterinario: selectVeterinario.value,
     fecha: document.getElementById('fechaCita').value,
     hora: document.getElementById('horaCita').value,
-    motivo: document.getElementById('motivoCita').value || null
+    motivo: document.getElementById('motivoCita').value || null,
+    forzar: document.getElementById('forzarHorario').checked
   };
 
   const esEdicion = id_cita !== '';

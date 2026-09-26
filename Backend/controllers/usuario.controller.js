@@ -4,7 +4,7 @@ const { respuestaError } = require('../utils/manejarError');
 
 // CU01: Registro de usuario
 async function crear(req, res) {
-  const { nombre, correo, telefono, password, id_rol } = req.body;
+  const { nombre, correo, telefono, password, id_rol, hora_inicio_laboral, hora_fin_laboral } = req.body;
 
   if (!nombre || !correo || !password || !id_rol) {
     return res.status(400).json({ mensaje: 'Nombre, correo, contraseña y rol son obligatorios' });
@@ -21,7 +21,7 @@ async function crear(req, res) {
     const password_hash = await bcrypt.hash(password, 10);
 
     const id_usuario = await usuarioModel.crearUsuario({
-      nombre, correo, telefono, password_hash, id_rol
+      nombre, correo, telefono, password_hash, id_rol, hora_inicio_laboral, hora_fin_laboral
     });
 
     res.status(201).json({

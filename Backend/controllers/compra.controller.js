@@ -21,6 +21,14 @@ async function obtener(req, res) {
   }
 }
 
+async function porProveedor(req, res) {
+  try {
+    res.json(await compraModel.listarPorProveedor(req.params.idProveedor));
+  } catch (error) {
+    respuestaError(res, error);
+  }
+}
+
 async function crear(req, res) {
   const { id_proveedor, items } = req.body;
 
@@ -39,4 +47,4 @@ async function crear(req, res) {
   }
 }
 
-module.exports = { listar, obtener, crear };
+module.exports = { listar, obtener, crear, porProveedor };

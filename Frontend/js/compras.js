@@ -185,5 +185,42 @@ document.getElementById('btnCerrarDetalleCompra').addEventListener('click', () =
   modalDetalleCompra.classList.add('oculto');
 });
 
+selectProveedorCompra.addEventListener('change', () => {
+  document.getElementById('btnRepetirCompra').classList.toggle('oculto', !selectProveedorCompra.value);
+});
+
+document.getElementById('btnRepetirCompra').addEventListener('click', async () => {
+  const idProveedor = selectProveedorCompra.value;
+  if (!idProveedor) return;
+
+  const respHistorial = await fetch(`${API_URL}/api/compras/proveedor/${idProveedor}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const historial = await respHistorial.json();
+
+  if (historial.length === 0) {
+    mostrarAlerta('Este proveedor no tiene compras anteriores registradas');
+    return;
+  }
+
+  const respDetalle = await fetch(`${API_URL}/api/compras/${historial[0].id_compra}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const ultimaCompra = await respDetalle.json();
+
+  listaItemsCompra.innerHTML = '';
+  ultimaCompra.detalle.forEach(item => {
+    crearFilaItemCompra();
+    const filaNueva = listaItemsCompra.lastElementChild;
+    const productoOriginal = productosDisponiblesCompra.find(p => p.nombre === item.producto);
+    if (productoOriginal) {
+      filaNueva.querySelector('.select-producto-compra').value = productoOriginal.id_producto;
+    }
+    filaNueva.querySelector('.input-cantidad-compra').value = item.cantidad;
+    filaNueva.querySelector('.input-costo-compra').value = item.costo_unitario;
+  });
+  recalcularTotalCompra();
+});
+
 cargarProveedoresYProductos();
 cargarCompras();

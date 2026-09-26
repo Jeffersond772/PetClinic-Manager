@@ -34,6 +34,14 @@ async function obtenerPorId(id_compra) {
   return compra;
 }
 
+async function listarPorProveedor(id_proveedor) {
+  const [rows] = await db.query(
+    `SELECT id_compra, fecha, total FROM compras WHERE id_proveedor = ? ORDER BY fecha DESC`,
+    [id_proveedor]
+  );
+  return rows;
+}
+
 // CU: registrar compra con varios productos, actualiza inventario y costo promedio automáticamente
 async function crear({ id_proveedor, id_usuario, items }) {
   const conexion = await db.getConnection();
@@ -105,4 +113,4 @@ async function crear({ id_proveedor, id_usuario, items }) {
   }
 }
 
-module.exports = { listar, obtenerPorId, crear };
+module.exports = { listar, obtenerPorId, crear, listarPorProveedor };

@@ -4,6 +4,7 @@ const compraController = require('../controllers/compra.controller');
 const { verificarToken, verificarRol } = require('../middlewares/auth.middleware');
 
 router.get('/', verificarToken, verificarRol(['Administrador']), compraController.listar);
+router.get('/proveedor/:idProveedor', verificarToken, verificarRol(['Administrador']), compraController.porProveedor);
 router.get('/:id', verificarToken, verificarRol(['Administrador']), compraController.obtener);
 router.post('/', verificarToken, verificarRol(['Administrador']), compraController.crear);
 

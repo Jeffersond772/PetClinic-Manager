@@ -235,7 +235,7 @@ async function verDetalle(id_cuenta) {
     ${cuenta.detalle.map(d => `
       <div class="detalle-cuenta-item">
         <span>${escaparHTML(d.producto || d.servicio)} (x${d.cantidad})${d.margen_porcentaje !== null ? ` <small class="margen-tag">margen ${d.margen_porcentaje}%</small>` : ''}</span>
-        <span>$${Number(d.subtotal).toLocaleString()}</span>
+        <span><small class="texto-secundario">Subtotal:</small> $${Number(d.subtotal).toLocaleString()}</span>
       </div>
     `).join('')}
     <div class="detalle-cuenta-resumen">

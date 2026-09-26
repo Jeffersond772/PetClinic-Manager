@@ -106,6 +106,14 @@
         <select id="veterinario" required>
           <option value="">Selecciona un veterinario</option>
         </select>
+        <p id="horarioLaboralHint" class="texto-secundario"></p>
+
+        <div id="grupoForzarHorario" class="oculto">
+          <label style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+            <input type="checkbox" id="forzarHorario" style="width:auto;">
+            Permitir fuera de horario laboral
+          </label>
+        </div>
 
         <label for="fechaCita">Fecha</label>
         <input type="date" id="fechaCita" required min="">

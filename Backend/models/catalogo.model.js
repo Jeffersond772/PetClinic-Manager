@@ -38,7 +38,7 @@ async function listarCategoriasProducto() {
 }
 async function listarVeterinarios() {
   const [rows] = await db.query(
-    `SELECT u.id_usuario, u.nombre
+    `SELECT u.id_usuario, u.nombre, u.hora_inicio_laboral, u.hora_fin_laboral
      FROM usuarios u
      JOIN roles r ON r.id_rol = u.id_rol
      WHERE r.nombre = 'Veterinario' AND u.estado = 'activo'

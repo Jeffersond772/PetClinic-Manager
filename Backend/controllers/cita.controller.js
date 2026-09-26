@@ -1,3 +1,4 @@
+const usuarioModel = require('../models/usuario.model');
 const citaModel = require('../models/cita.model');
 const { respuestaError } = require('../utils/manejarError');
 const { obtenerFechaHoyLocal } = require('../utils/fecha');
@@ -47,7 +48,7 @@ async function agenda(req, res) {
 
 // CU07: agendar cita
 async function crear(req, res) {
-  const { id_paciente, id_propietario, id_veterinario, fecha, hora, motivo } = req.body;
+  const { id_paciente, id_propietario, id_veterinario, fecha, hora, motivo, forzar } = req.body;
 
   if (!id_paciente || !id_propietario || !id_veterinario || !fecha || !hora) {
     return res.status(400).json({ mensaje: 'Paciente, propietario, veterinario, fecha y hora son obligatorios' });
@@ -63,6 +64,16 @@ async function crear(req, res) {
     const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora);
     if (hayConflicto) {
       return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
+    }
+
+    // Horario laboral del veterinario (un Administrador puede forzar la excepción)
+    const infoHorario = await usuarioModel.estaDentroDeHorarioLaboral(id_veterinario, hora);
+    const puedeForzar = req.usuario.rol === 'Administrador' && forzar === true;
+    if (infoHorario && !infoHorario.dentro && !puedeForzar) {
+      return res.status(400).json({
+        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0,5)} a ${infoHorario.hora_fin_laboral.slice(0,5)}.` +
+          (req.usuario.rol === 'Administrador' ? ' Activa "Permitir fuera de horario" si deseas agendarla de todas formas.' : ' Contacta a un administrador si necesitas un horario distinto.')
+      });
     }
 
     const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo });
@@ -81,7 +92,7 @@ async function crear(req, res) {
 
 // CU12: modificar cita
 async function actualizar(req, res) {
-  const { fecha, hora, motivo, id_veterinario } = req.body;
+  const { fecha, hora, motivo, id_veterinario, forzar } = req.body;
 
   if (!fecha || !hora || !id_veterinario) {
     return res.status(400).json({ mensaje: 'Fecha, hora y veterinario son obligatorios' });
@@ -102,6 +113,15 @@ async function actualizar(req, res) {
     const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora, req.params.id);
     if (hayConflicto) {
       return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
+    }
+
+    const infoHorario = await usuarioModel.estaDentroDeHorarioLaboral(id_veterinario, hora);
+    const puedeForzar = req.usuario.rol === 'Administrador' && forzar === true;
+    if (infoHorario && !infoHorario.dentro && !puedeForzar) {
+      return res.status(400).json({
+        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0,5)} a ${infoHorario.hora_fin_laboral.slice(0,5)}.` +
+          (req.usuario.rol === 'Administrador' ? ' Activa "Permitir fuera de horario" si deseas agendarla de todas formas.' : ' Contacta a un administrador si necesitas un horario distinto.')
+      });
     }
 
     await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario });

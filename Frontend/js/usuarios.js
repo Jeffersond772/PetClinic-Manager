@@ -9,14 +9,24 @@ const inputPassword = document.getElementById('passwordUsuario');
 
 let usuarios = [];
 
+let rolesCache = [];
+const grupoHorarioLaboral = document.getElementById('grupoHorarioLaboral');
+
 async function cargarRoles() {
   const respuesta = await fetch(`${API_URL}/api/catalogos/roles`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  const roles = await respuesta.json();
+  rolesCache = await respuesta.json();
   selectRol.innerHTML = '<option value="">Selecciona un rol</option>' +
-    roles.map(r => `<option value="${r.id_rol}">${r.nombre}</option>`).join('');
+    rolesCache.map(r => `<option value="${r.id_rol}">${r.nombre}</option>`).join('');
 }
+
+function actualizarVisibilidadHorario() {
+  const rol = rolesCache.find(r => r.id_rol == selectRol.value);
+  grupoHorarioLaboral.classList.toggle('oculto', !rol || rol.nombre !== 'Veterinario');
+}
+
+selectRol.addEventListener('change', actualizarVisibilidadHorario);
 
 async function cargarUsuarios() {
   mostrarCargando(tablaUsuarios, 5);
@@ -70,6 +80,7 @@ document.getElementById('btnNuevoUsuario').addEventListener('click', () => {
   mensajeErrorUsuario.textContent = '';
   grupoPassword.style.display = 'block';
   inputPassword.required = true;
+  grupoHorarioLaboral.classList.add('oculto');
   modalUsuario.classList.remove('oculto');
 });
 
@@ -84,6 +95,9 @@ async function editarUsuario(id_usuario) {
   document.getElementById('correoUsuario').value = u.correo;
   document.getElementById('telefonoUsuario').value = u.telefono || '';
   selectRol.value = u.id_rol;
+  actualizarVisibilidadHorario();
+  document.getElementById('horaInicioLaboral').value = u.hora_inicio_laboral ? u.hora_inicio_laboral.slice(0,5) : '';
+  document.getElementById('horaFinLaboral').value = u.hora_fin_laboral ? u.hora_fin_laboral.slice(0,5) : '';
 
   // En edición no se cambia la contraseña desde aquí (evita reescribirla sin querer)
   grupoPassword.style.display = 'none';
@@ -105,11 +119,16 @@ formUsuario.addEventListener('submit', async (e) => {
   const id_usuario = document.getElementById('idUsuario').value;
   const esEdicion = id_usuario !== '';
 
+  const rolSeleccionado = rolesCache.find(r => r.id_rol == selectRol.value);
+  const esVeterinario = rolSeleccionado && rolSeleccionado.nombre === 'Veterinario';
+
   const datos = {
     nombre: document.getElementById('nombreUsuarioInput').value,
     correo: document.getElementById('correoUsuario').value,
     telefono: document.getElementById('telefonoUsuario').value || null,
-    id_rol: selectRol.value
+    id_rol: selectRol.value,
+    hora_inicio_laboral: esVeterinario ? (document.getElementById('horaInicioLaboral').value || null) : null,
+    hora_fin_laboral: esVeterinario ? (document.getElementById('horaFinLaboral').value || null) : null
   };
 
   if (!esEdicion) {
