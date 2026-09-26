@@ -59,6 +59,14 @@ async function crear(req, res) {
     return res.status(400).json({ mensaje: 'No se puede agendar una cita en una fecha anterior a hoy' });
   }
 
+      // Flujo alternativo CU07: horario ya ocupado
+    console.log('DEBUG CITA >>>', { id_veterinario, fecha, hora });
+    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora);
+    console.log('DEBUG CITA >>> hayConflicto:', hayConflicto);
+    if (hayConflicto) {
+      return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
+    }
+
   try {
     // Flujo alternativo CU07: horario ya ocupado
     const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora);
