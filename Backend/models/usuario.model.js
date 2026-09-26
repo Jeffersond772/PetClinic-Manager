@@ -33,7 +33,7 @@ async function estaDentroDeHorarioLaboral(id_usuario, hora) {
   const [rows] = await db.query(
     `SELECT hora_inicio_laboral, hora_fin_laboral,
             (hora_inicio_laboral IS NULL OR hora_fin_laboral IS NULL
-             OR ? BETWEEN hora_inicio_laboral AND hora_fin_laboral) AS dentro
+             OR CAST(? AS TIME) BETWEEN hora_inicio_laboral AND hora_fin_laboral) AS dentro
      FROM usuarios WHERE id_usuario = ?`,
     [hora, id_usuario]
   );
