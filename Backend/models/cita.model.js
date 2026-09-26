@@ -62,9 +62,9 @@ async function existeConflictoHorario(id_veterinario, fecha, hora, id_cita_exclu
     SELECT id_cita FROM citas
     WHERE id_veterinario = ? AND fecha = ?
       AND estado IN ('programada', 'atendida')
-      AND ABS(TIMESTAMPDIFF(MINUTE, hora, ?)) < ?
+      AND ABS(TIME_TO_SEC(hora) - TIME_TO_SEC(?)) < ?
   `;
-  const parametros = [id_veterinario, fecha, hora, DURACION_MINIMA_MINUTOS];
+  const parametros = [id_veterinario, fecha, hora, DURACION_MINIMA_MINUTOS * 60];
 
   if (id_cita_excluir) {
     sql += ` AND id_cita != ?`;
