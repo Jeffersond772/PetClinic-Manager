@@ -6,8 +6,8 @@ const db = require('./config/db');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-  app.set('trust proxy', 1);
-  app.use(helmet());
+app.set('trust proxy', 1);
+app.use(helmet());
 
 // Middlewares
 const origenesPermitidos = process.env.FRONTEND_URL
@@ -63,4 +63,5 @@ app.use('/api/compras', require('./routes/compras.routes'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`API corriendo en http://localhost:${PORT}`);
+  require('./jobs/notificaciones.job').iniciar();
 });

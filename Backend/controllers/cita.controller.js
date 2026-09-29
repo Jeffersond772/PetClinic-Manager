@@ -1,5 +1,6 @@
 const usuarioModel = require('../models/usuario.model');
 const citaModel = require('../models/cita.model');
+const notificacionModel = require('../models/notificacion.model');
 const { respuestaError } = require('../utils/manejarError');
 const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
@@ -7,7 +8,7 @@ async function listar(req, res) {
   try {
     const citas = await citaModel.listar();
     res.json(citas);
-    } catch (error) {
+  } catch (error) {
     respuestaError(res, error);
   }
 }
@@ -19,7 +20,7 @@ async function obtener(req, res) {
       return res.status(404).json({ mensaje: 'Cita no encontrada' });
     }
     res.json(cita);
-    } catch (error) {
+  } catch (error) {
     respuestaError(res, error);
   }
 }
@@ -41,7 +42,7 @@ async function agenda(req, res) {
     }
 
     res.json({ citas });
-    } catch (error) {
+  } catch (error) {
     respuestaError(res, error);
   }
 }
@@ -71,12 +72,13 @@ async function crear(req, res) {
     const puedeForzar = req.usuario.rol === 'Administrador' && forzar === true;
     if (infoHorario && !infoHorario.dentro && !puedeForzar) {
       return res.status(400).json({
-        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0,5)} a ${infoHorario.hora_fin_laboral.slice(0,5)}.` +
+        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0, 5)} a ${infoHorario.hora_fin_laboral.slice(0, 5)}.` +
           (req.usuario.rol === 'Administrador' ? ' Activa "Permitir fuera de horario" si deseas agendarla de todas formas.' : ' Contacta a un administrador si necesitas un horario distinto.')
       });
     }
 
     const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo });
+    await notificacionModel.crear({ id_cita, id_veterinario, tipo: 'nueva' });
     res.status(201).json({ mensaje: 'Cita agendada correctamente', id_cita });
 
   } catch (error) {
@@ -119,12 +121,13 @@ async function actualizar(req, res) {
     const puedeForzar = req.usuario.rol === 'Administrador' && forzar === true;
     if (infoHorario && !infoHorario.dentro && !puedeForzar) {
       return res.status(400).json({
-        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0,5)} a ${infoHorario.hora_fin_laboral.slice(0,5)}.` +
+        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0, 5)} a ${infoHorario.hora_fin_laboral.slice(0, 5)}.` +
           (req.usuario.rol === 'Administrador' ? ' Activa "Permitir fuera de horario" si deseas agendarla de todas formas.' : ' Contacta a un administrador si necesitas un horario distinto.')
       });
     }
 
     await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario });
+    await notificacionModel.crear({ id_cita: req.params.id, id_veterinario, tipo: 'actualizada' });
     res.json({ mensaje: 'Cita actualizada correctamente' });
 
   } catch (error) {
@@ -143,8 +146,9 @@ async function cancelar(req, res) {
       return res.status(404).json({ mensaje: 'Cita no encontrada' });
     }
     await citaModel.cambiarEstado(req.params.id, 'cancelada');
+    await notificacionModel.crear({ id_cita: req.params.id, id_veterinario: cita.id_veterinario, tipo: 'cancelada' });
     res.json({ mensaje: 'Cita cancelada correctamente' });
-    } catch (error) {
+  } catch (error) {
     respuestaError(res, error);
   }
 }
@@ -165,7 +169,7 @@ async function cambiarEstado(req, res) {
     }
     await citaModel.cambiarEstado(req.params.id, estado);
     res.json({ mensaje: 'Estado de la cita actualizado correctamente' });
-    } catch (error) {
+  } catch (error) {
     respuestaError(res, error);
   }
 }
