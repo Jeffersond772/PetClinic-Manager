@@ -1,6 +1,5 @@
 const usuarioModel = require('../models/usuario.model');
 const citaModel = require('../models/cita.model');
-const notificacionModel = require('../models/notificacion.model');
 const { respuestaError } = require('../utils/manejarError');
 const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
@@ -78,7 +77,6 @@ async function crear(req, res) {
     }
 
     const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo });
-    await notificacionModel.crear({ id_cita, id_veterinario, tipo: 'nueva' });
     res.status(201).json({ mensaje: 'Cita agendada correctamente', id_cita });
 
   } catch (error) {
@@ -127,7 +125,6 @@ async function actualizar(req, res) {
     }
 
     await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario });
-    await notificacionModel.crear({ id_cita: req.params.id, id_veterinario, tipo: 'actualizada' });
     res.json({ mensaje: 'Cita actualizada correctamente' });
 
   } catch (error) {
@@ -146,7 +143,6 @@ async function cancelar(req, res) {
       return res.status(404).json({ mensaje: 'Cita no encontrada' });
     }
     await citaModel.cambiarEstado(req.params.id, 'cancelada');
-    await notificacionModel.crear({ id_cita: req.params.id, id_veterinario: cita.id_veterinario, tipo: 'cancelada' });
     res.json({ mensaje: 'Cita cancelada correctamente' });
   } catch (error) {
     respuestaError(res, error);

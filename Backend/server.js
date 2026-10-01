@@ -63,5 +63,4 @@ app.use('/api/compras', require('./routes/compras.routes'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`API corriendo en http://localhost:${PORT}`);
-  require('./jobs/notificaciones.job').iniciar();
 });
