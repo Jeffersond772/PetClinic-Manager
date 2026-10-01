@@ -6,8 +6,12 @@ const { respuestaError } = require('../utils/manejarError');
 async function crear(req, res) {
   const { nombre, correo, telefono, password, id_rol, hora_inicio_laboral, hora_fin_laboral } = req.body;
 
-  if (!nombre || !correo || !password || !id_rol) {
+    if (!nombre || !correo || !password || !id_rol) {
     return res.status(400).json({ mensaje: 'Nombre, correo, contraseña y rol son obligatorios' });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({ mensaje: 'La contraseña debe tener al menos 8 caracteres' });
   }
 
   try {

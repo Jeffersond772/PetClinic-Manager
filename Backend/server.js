@@ -15,8 +15,8 @@ const origenesPermitidos = process.env.FRONTEND_URL
   : '*'; // en desarrollo local, permite cualquier origen
 
 app.use(cors({ origin: origenesPermitidos }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Ruta de prueba
 app.get('/', (req, res) => {
