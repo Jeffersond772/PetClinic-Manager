@@ -87,10 +87,14 @@ async function cambiarEstado(req, res) {
     return res.status(400).json({ mensaje: "El estado debe ser 'activo' o 'inactivo'" });
   }
 
-  try {
+    try {
     const usuario = await usuarioModel.obtenerPorId(req.params.id);
     if (!usuario) {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    if (Number(req.params.id) === req.usuario.id_usuario && estado === 'inactivo') {
+      return res.status(400).json({ mensaje: 'No puedes desactivar tu propio usuario' });
     }
 
     await usuarioModel.cambiarEstado(req.params.id, estado);
