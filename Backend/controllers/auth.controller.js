@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const usuarioModel = require('../models/usuario.model');
+const { respuestaError } = require('../utils/manejarError');
 
 async function login(req, res) {
   const { correo, password } = req.body;
@@ -53,9 +54,8 @@ async function login(req, res) {
       }
     });
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ mensaje: 'Error en el servidor', error: error.message });
+    } catch (error) {
+    respuestaError(res, error);
   }
 }
 
