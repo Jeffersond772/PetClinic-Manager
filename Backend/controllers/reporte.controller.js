@@ -59,6 +59,17 @@ async function resumen(req, res) {
   if (!rango) return;
   try {
     const datos = await reporteModel.resumenGeneral(rango.desde, rango.hasta);
+
+    // Solo el Administrador ve cifras financieras en el dashboard
+    if (req.usuario.rol !== 'Administrador') {
+      delete datos.ingresos;
+      delete datos.gastos;
+      delete datos.saldo;
+      delete datos.costoMercancia;
+      delete datos.utilidadBruta;
+      delete datos.deudasPendientes;
+    }
+
     res.json(datos);
   } catch (error) {
     respuestaError(res, error);
