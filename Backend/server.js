@@ -33,10 +33,10 @@ app.get('/test-db', async (req, res) => {
 });
 
 const limitadorLogin = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // máximo 5 intentos
-  skipSuccessfulRequests: true, // solo cuenta intentos fallidos (contraseña/usuario incorrectos)
-  message: { mensaje: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos.' },
+  windowMs: 10 * 60 * 1000, // 10 minutos (usa 5 * 60 * 1000 para 5)
+  max: 5, // máximo 5 intentos fallidos
+  skipSuccessfulRequests: true, // solo cuenta los intentos fallidos
+  message: { mensaje: 'Demasiados intentos de inicio de sesión. Intenta de nuevo en 10 minutos.' },
   standardHeaders: true,
   legacyHeaders: false
 });

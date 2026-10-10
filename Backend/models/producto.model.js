@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 async function listar() {
   const [rows] = await db.query(
-    `SELECT p.id_producto, p.nombre, p.precio, p.cantidad_disponible, p.unidad_medida,
+        `SELECT p.id_producto, p.nombre, p.precio, p.costo_promedio, p.cantidad_disponible, p.unidad_medida,
             p.stock_minimo, p.fecha_vencimiento, p.estado,
             c.id_categoria, c.nombre AS categoria,
             pv.id_proveedor, pv.nombre AS proveedor

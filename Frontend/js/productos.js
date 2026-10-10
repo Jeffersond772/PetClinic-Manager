@@ -51,7 +51,7 @@ async function cargarAlertas() {
   const proximosVencer = await respVencer.json();
 
   let html = '';
-    if (bajoStock.length > 0) {
+  if (bajoStock.length > 0) {
     html += `<div class="alerta alerta-stock-bajo">${bajoStock.length} producto(s) en o por debajo del stock mínimo: ${bajoStock.map(p => escaparHTML(p.nombre)).join(', ')}</div>`;
   }
   if (proximosVencer.length > 0) {
@@ -85,21 +85,27 @@ async function cargarProductos() {
 
 function pintarTabla(lista) {
   if (lista.length === 0) {
-    tablaProductos.innerHTML = `<tr><td colspan="6" class="tabla-vacia">No hay productos registrados</td></tr>`;
+    tablaProductos.innerHTML = `<tr><td colspan="8" class="tabla-vacia">No hay productos registrados</td></tr>`;
     return;
   }
 
-    tablaProductos.innerHTML = lista.map(p => {
+  tablaProductos.innerHTML = lista.map(p => {
     const bajoStock = Number(p.cantidad_disponible) <= Number(p.stock_minimo);
+    const costo = Number(p.costo_promedio) || 0;
+    const margen = costo > 0 && Number(p.precio) > 0
+      ? (((Number(p.precio) - costo) / Number(p.precio)) * 100).toFixed(1) + '%'
+      : '-';
     return `
       <tr class="${bajoStock ? 'fila-stock-bajo' : ''}">
         <td>${escaparHTML(p.nombre)}</td>
         <td>${escaparHTML(p.categoria)}</td>
         <td>$${Number(p.precio).toLocaleString()}</td>
+        <td>${costo > 0 ? '$' + costo.toLocaleString('es-CO', { maximumFractionDigits: 0 }) : '-'}</td>
+        <td>${margen}</td>
         <td>${p.cantidad_disponible} ${escaparHTML(p.unidad_medida)}</td>
         <td>${p.fecha_vencimiento ? p.fecha_vencimiento.split('T')[0] : '-'}</td>
         <td>
-                    <button class="btn-icono" onclick="abrirMovimiento(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}')">Ajustar</button>
+          <button class="btn-icono" onclick="abrirMovimiento(${p.id_producto}, '${p.nombre.replace(/'/g, "\\'")}')">Ajustar</button>
           <button class="btn-icono" onclick="editarProducto(${p.id_producto})">Editar</button>
         </td>
       </tr>
@@ -231,7 +237,7 @@ formMovimiento.addEventListener('submit', async (e) => {
   e.preventDefault();
   mensajeErrorMovimiento.textContent = '';
 
-    const tipo = document.getElementById('tipoMovimientoSelect').value;
+  const tipo = document.getElementById('tipoMovimientoSelect').value;
   const id_producto = document.getElementById('idProductoMovimiento').value;
 
   const datos = {

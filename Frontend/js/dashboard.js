@@ -52,24 +52,23 @@ if (tarjetasResumenDashboard) {
   }
 
   function pintarTarjetasDashboard(r) {
-    tarjetasResumenDashboard.innerHTML = `
-      <div class="tarjeta-kpi acento-verde clickeable" style="animation-delay:0s" data-destino="${destinoTarjeta.ingresos}">
-        <div class="valor-kpi">$${r.ingresos.toLocaleString()}</div>
-        <div class="etiqueta-kpi">Ingresos del mes</div>
+    const tarjetas = [];
+
+    if (r.ingresos !== undefined) {
+      tarjetas.push({ clase: 'acento-verde', destino: destinoTarjeta.ingresos, valor: `$${r.ingresos.toLocaleString()}`, etiqueta: 'Ingresos del mes' });
+    }
+    if (r.gastos !== undefined) {
+      tarjetas.push({ clase: 'acento-rojo', destino: destinoTarjeta.gastos, valor: `$${r.gastos.toLocaleString()}`, etiqueta: 'Gastos del mes' });
+    }
+    tarjetas.push({ clase: 'acento-azul', destino: destinoTarjeta.citas, valor: r.citasAtendidas, etiqueta: 'Citas atendidas' });
+    tarjetas.push({ clase: 'acento-rojo', destino: destinoTarjeta.stock, valor: r.productosBajoStock, etiqueta: 'Productos bajo stock' });
+
+    tarjetasResumenDashboard.innerHTML = tarjetas.map((t, i) => `
+      <div class="tarjeta-kpi ${t.clase} clickeable" style="animation-delay:${i * 0.05}s" data-destino="${t.destino}">
+        <div class="valor-kpi">${t.valor}</div>
+        <div class="etiqueta-kpi">${t.etiqueta}</div>
       </div>
-      <div class="tarjeta-kpi acento-rojo clickeable" style="animation-delay:0.05s" data-destino="${destinoTarjeta.gastos}">
-        <div class="valor-kpi">$${r.gastos.toLocaleString()}</div>
-        <div class="etiqueta-kpi">Gastos del mes</div>
-      </div>
-      <div class="tarjeta-kpi acento-azul clickeable" style="animation-delay:0.1s" data-destino="${destinoTarjeta.citas}">
-        <div class="valor-kpi">${r.citasAtendidas}</div>
-        <div class="etiqueta-kpi">Citas atendidas</div>
-      </div>
-      <div class="tarjeta-kpi acento-rojo clickeable" style="animation-delay:0.15s" data-destino="${destinoTarjeta.stock}">
-        <div class="valor-kpi">${r.productosBajoStock}</div>
-        <div class="etiqueta-kpi">Productos bajo stock</div>
-      </div>
-    `;
+    `).join('');
 
     tarjetasResumenDashboard.querySelectorAll('.clickeable').forEach(tarjeta => {
       tarjeta.addEventListener('click', () => {
@@ -107,7 +106,7 @@ if (tarjetasResumenDashboard) {
     }
   }
 
-    async function cargarGraficosDashboard() {
+  async function cargarGraficosDashboard() {
     try {
       const puedeVerConsultas = usuario.rol === 'Administrador' || usuario.rol === 'Veterinario';
 
@@ -148,7 +147,7 @@ if (tarjetasResumenDashboard) {
       let indiceSiguiente = 1;
 
       if (puedeVerConsultas) {
-                const consultas = await respuestas[indiceSiguiente].json();
+        const consultas = await respuestas[indiceSiguiente].json();
         consultas.porDia.forEach(d => { d.dia = d.dia.slice(0, 10); });
         indiceSiguiente++;
 
@@ -169,7 +168,7 @@ if (tarjetasResumenDashboard) {
       }
 
       if (usuario.rol === 'Administrador') {
-                const ingresos = await respuestas[indiceSiguiente].json();
+        const ingresos = await respuestas[indiceSiguiente].json();
         const gastos = await respuestas[indiceSiguiente + 1].json();
         ingresos.forEach(i => { i.dia = i.dia.slice(0, 10); });
         gastos.forEach(g => { g.dia = g.dia.slice(0, 10); });

@@ -63,7 +63,7 @@ function pintarTabla(lista) {
       <td><span class="badge-estado badge-${u.estado === 'activo' ? 'atendida' : 'cancelada'}">${u.estado}</span></td>
       <td>
         <button class="btn-icono" onclick="editarUsuario(${u.id_usuario})">Editar</button>
-        ${u.correo === usuario.correo ? '' : `
+        ${u.id_usuario === usuario.id_usuario ? '' : `
           <button class="btn-icono" onclick="cambiarEstadoUsuario(${u.id_usuario}, '${u.estado === 'activo' ? 'inactivo' : 'activo'}')">
             ${u.estado === 'activo' ? 'Desactivar' : 'Activar'}
           </button>
