@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { registrarVentaHistoria } = require('../utils/ventaHistoria');
 
 // CU14: historia clínica completa de un paciente
 async function obtenerPorPaciente(id_paciente) {
@@ -57,15 +58,20 @@ async function obtenerPorPaciente(id_paciente) {
   return { paciente, consultas, procedimientos };
 }
 
-// CU15: registrar vacuna, desparasitación u otro procedimiento preventivo
-async function registrarProcedimientoPreventivo({ id_paciente, tipo, id_producto, cantidad, id_veterinario, fecha, observaciones }) {
+// CU15: registra vacuna/desparasitación/procedimiento y factura producto/servicio en la misma transacción.
+async function registrarProcedimientoPreventivo({
+  id_paciente, tipo, id_producto, cantidad, id_servicio, id_veterinario, fecha, observaciones
+}) {
   const conexion = await db.getConnection();
 
   try {
     await conexion.beginTransaction();
 
     const [historias] = await conexion.query(
-      `SELECT id_historia FROM historias_clinicas WHERE id_paciente = ?`,
+      `SELECT h.id_historia, p.id_propietario
+       FROM historias_clinicas h
+       JOIN pacientes p ON p.id_paciente = h.id_paciente
+       WHERE h.id_paciente = ? FOR UPDATE`,
       [id_paciente]
     );
 
@@ -75,18 +81,21 @@ async function registrarProcedimientoPreventivo({ id_paciente, tipo, id_producto
       throw error;
     }
 
-    const id_historia = historias[0].id_historia;
+    const { id_historia, id_propietario } = historias[0];
+    const itemsFacturacion = [];
+    let producto = null;
+    const cantidadProducto = id_producto ? Number(cantidad) : null;
 
-    const [resultado] = await conexion.query(
-      `INSERT INTO procedimientos_preventivos (id_historia, tipo, id_producto, cantidad, id_veterinario, fecha, observaciones)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id_historia, tipo, id_producto || null, cantidad || null, id_veterinario, fecha, observaciones || null]
-    );
+    if (id_producto) {
+      if (cantidad === null || cantidad === undefined || cantidad === '' || !Number.isFinite(cantidadProducto) || cantidadProducto <= 0) {
+        const error = new Error('Indica una cantidad mayor que cero para el producto aplicado');
+        error.codigoNegocio = 'CANTIDAD_INVALIDA';
+        throw error;
+      }
 
-    // Si se usó un producto del inventario (ej. una vacuna), se descuenta el stock
-    if (id_producto && cantidad) {
       const [productos] = await conexion.query(
-        `SELECT cantidad_disponible FROM productos WHERE id_producto = ? AND estado = 'activo' FOR UPDATE`,
+        `SELECT id_producto, nombre, precio, costo_promedio, cantidad_disponible
+         FROM productos WHERE id_producto = ? AND estado = 'activo' FOR UPDATE`,
         [id_producto]
       );
 
@@ -96,26 +105,78 @@ async function registrarProcedimientoPreventivo({ id_paciente, tipo, id_producto
         throw error;
       }
 
-      if (Number(productos[0].cantidad_disponible) < Number(cantidad)) {
-        const error = new Error('Stock insuficiente para el producto indicado');
+      producto = productos[0];
+      if (Number(producto.cantidad_disponible) < cantidadProducto) {
+        const error = new Error(`Stock insuficiente para "${producto.nombre}"`);
         error.codigoNegocio = 'STOCK_INSUFICIENTE';
         throw error;
       }
+    }
 
+    let servicio = null;
+    if (id_servicio) {
+      const [servicios] = await conexion.query(
+        `SELECT id_servicio, nombre, precio FROM servicios WHERE id_servicio = ? FOR UPDATE`,
+        [id_servicio]
+      );
+
+      if (servicios.length === 0) {
+        const error = new Error('El servicio seleccionado no existe en el catálogo');
+        error.codigoNegocio = 'SERVICIO_NO_EXISTE';
+        throw error;
+      }
+      servicio = servicios[0];
+    }
+
+    const [resultado] = await conexion.query(
+      `INSERT INTO procedimientos_preventivos (id_historia, tipo, id_producto, cantidad, id_veterinario, fecha, observaciones)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id_historia, tipo, id_producto || null, id_producto ? cantidadProducto : (cantidad || null), id_veterinario, fecha, observaciones || null]
+    );
+
+    // El producto aplicado se descuenta una sola vez aquí. El registro de venta no vuelve a tocar el stock.
+    if (producto) {
       await conexion.query(
         `INSERT INTO movimientos_inventario (id_producto, tipo, motivo, cantidad, id_usuario)
          VALUES (?, 'salida', 'consulta', ?, ?)`,
-        [id_producto, cantidad, id_veterinario]
+        [producto.id_producto, cantidadProducto, id_veterinario]
       );
 
       await conexion.query(
         `UPDATE productos SET cantidad_disponible = cantidad_disponible - ? WHERE id_producto = ?`,
-        [cantidad, id_producto]
+        [cantidadProducto, producto.id_producto]
       );
+
+      itemsFacturacion.push({
+        tipo: 'producto',
+        id_producto: producto.id_producto,
+        cantidad: cantidadProducto,
+        precio_unitario: Number(producto.precio),
+        costo_unitario: Number(producto.costo_promedio)
+      });
     }
 
+    // Si también se seleccionó el servicio (p. ej. aplicación de vacuna), se factura como una unidad.
+    if (servicio) {
+      itemsFacturacion.push({
+        tipo: 'servicio',
+        id_servicio: servicio.id_servicio,
+        cantidad: 1,
+        precio_unitario: Number(servicio.precio),
+        costo_unitario: null
+      });
+    }
+
+    const venta = await registrarVentaHistoria({
+      conexion,
+      id_propietario,
+      id_paciente,
+      id_usuario: id_veterinario,
+      items: itemsFacturacion
+    });
+
     await conexion.commit();
-    return resultado.insertId;
+    return { id_procedimiento: resultado.insertId, ...venta };
 
   } catch (error) {
     await conexion.rollback();
@@ -124,5 +185,4 @@ async function registrarProcedimientoPreventivo({ id_paciente, tipo, id_producto
     conexion.release();
   }
 }
-
 module.exports = { obtenerPorPaciente, registrarProcedimientoPreventivo };

@@ -31,7 +31,7 @@ async function cargarCatalogos() {
 }
 
 async function cargarCuentas() {
-  mostrarCargando(tablaCuentas, 6);
+  mostrarCargando(tablaCuentas, 7);
   try {
     const respuesta = await fetch(`${API_URL}/api/cuentas`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -47,27 +47,30 @@ async function cargarCuentas() {
 
   } catch (error) {
     console.error(error);
-    tablaCuentas.innerHTML = `<tr><td colspan="6" class="tabla-vacia">No se pudo conectar con el servidor</td></tr>`;
+    tablaCuentas.innerHTML = `<tr><td colspan="7" class="tabla-vacia">No se pudo conectar con el servidor</td></tr>`;
   }
 }
 
 function pintarTabla(cuentas) {
   if (cuentas.length === 0) {
-    tablaCuentas.innerHTML = `<tr><td colspan="6" class="tabla-vacia">No hay cuentas registradas</td></tr>`;
+    tablaCuentas.innerHTML = `<tr><td colspan="7" class="tabla-vacia">No hay cuentas registradas</td></tr>`;
     return;
   }
 
-    tablaCuentas.innerHTML = cuentas.map(c => `
+  tablaCuentas.innerHTML = cuentas.map(c => `
     <tr>
       <td>${c.fecha.split('T')[0]}</td>
       <td>${escaparHTML(c.propietario)}</td>
-      <td>$${Number(c.total).toLocaleString()}</td>
-      <td>$${Number(c.total_pagado).toLocaleString()}</td>
+      <td>${c.paciente
+      ? `<strong>${escaparHTML(c.paciente)}</strong><br><small class="texto-secundario">Desde historia clínica</small>`
+      : '<span class="texto-secundario">—</span>'}</td>
+      <td>$${Number(c.total).toLocaleString('es-CO')}</td>
+      <td>$${Number(c.total_pagado).toLocaleString('es-CO')}</td>
       <td><span class="badge-estado badge-${c.estado}">${c.estado}</span></td>
       <td><button class="btn-icono" onclick="verDetalle(${c.id_cuenta})">Ver / Pagar</button></td>
     </tr>
   `).join('');
-    }
+}
 
 // ==================== AUTOCOMPLETAR PROPIETARIO ====================
 
@@ -88,7 +91,7 @@ inputPropietarioTexto.addEventListener('input', () => {
     });
     const resultados = await respuesta.json();
 
-        resultadosPropietario.innerHTML = resultados.length === 0
+    resultadosPropietario.innerHTML = resultados.length === 0
       ? `<div class="resultado-item">Sin coincidencias</div>`
       : resultados.map(p => `
           <div class="resultado-item" onclick="seleccionarPropietario(${p.id_propietario}, '${p.nombre.replace(/'/g, "\\'")}')">
@@ -230,18 +233,22 @@ async function verDetalle(id_cuenta) {
   const totalPagado = cuenta.pagos.reduce((suma, p) => suma + Number(p.monto), 0);
   const saldo = Number(cuenta.total) - totalPagado;
 
-    contenidoDetalleCuenta.innerHTML = `
-    <p class="texto-secundario">Propietario: ${escaparHTML(cuenta.propietario)} · ${cuenta.fecha.split('T')[0]}</p>
+  contenidoDetalleCuenta.innerHTML = `
+    <p class="texto-secundario">Propietario: ${escaparHTML(cuenta.propietario)}${cuenta.paciente ? ` · Paciente: ${escaparHTML(cuenta.paciente)}` : ''} · ${cuenta.fecha.split('T')[0]}</p>
     ${cuenta.detalle.map(d => `
       <div class="detalle-cuenta-item">
-        <span>${escaparHTML(d.producto || d.servicio)} (x${d.cantidad})${d.margen_porcentaje !== null ? ` <small class="margen-tag">margen ${d.margen_porcentaje}%</small>` : ''}</span>
-        <span><small class="texto-secundario">Subtotal:</small> $${Number(d.subtotal).toLocaleString()}</span>
+        <span>
+          ${escaparHTML(d.producto || d.servicio)} (x${d.cantidad})
+          <br><small class="texto-secundario">Precio unitario: $${Number(d.precio_unitario).toLocaleString('es-CO')}</small>
+          ${d.margen_porcentaje !== null ? ` <small class="margen-tag">margen ${d.margen_porcentaje}%</small>` : ''}
+        </span>
+        <span><small class="texto-secundario">Subtotal:</small> $${Number(d.subtotal).toLocaleString('es-CO')}</span>
       </div>
     `).join('')}
     <div class="detalle-cuenta-resumen">
-      <p><span>Total</span><strong>$${Number(cuenta.total).toLocaleString()}</strong></p>
-      <p><span>Pagado</span><span>$${totalPagado.toLocaleString()}</span></p>
-      <p><span>Saldo pendiente</span><strong>$${saldo.toLocaleString()}</strong></p>
+      <p><span>Total</span><strong>$${Number(cuenta.total).toLocaleString('es-CO')}</strong></p>
+      <p><span>Pagado</span><span>$${totalPagado.toLocaleString('es-CO')}</span></p>
+      <p><span>Saldo pendiente</span><strong>$${saldo.toLocaleString('es-CO')}</strong></p>
     </div>
   `;
 
@@ -250,7 +257,7 @@ async function verDetalle(id_cuenta) {
   mensajeErrorPago.textContent = '';
 
   // Si ya está pagada, ocultamos el formulario de pago
-    // Si ya está pagada, ocultamos SOLO los campos de pago, nunca el botón de cerrar
+  // Si ya está pagada, ocultamos SOLO los campos de pago, nunca el botón de cerrar
   const pagada = cuenta.estado === 'pagada';
   document.getElementById('camposPago').style.display = pagada ? 'none' : 'block';
   document.getElementById('btnRegistrarPago').style.display = pagada ? 'none' : 'inline-block';
@@ -304,12 +311,12 @@ function abrirFacturaImprimible(cuenta) {
   const fecha = new Date(cuenta.fecha);
   const fechaFormateada = fecha.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const filasItems = cuenta.detalle.map(d => `
+  const filasItems = cuenta.detalle.map(d => `
     <tr>
       <td>${escaparHTML(d.producto || d.servicio)}</td>
       <td style="text-align:center;">${d.cantidad}</td>
-      <td style="text-align:right;">$${Number(d.precio_unitario).toLocaleString()}</td>
-      <td style="text-align:right;">$${Number(d.subtotal).toLocaleString()}</td>
+      <td style="text-align:right;">$${Number(d.precio_unitario).toLocaleString('es-CO')}</td>
+      <td style="text-align:right;">$${Number(d.subtotal).toLocaleString('es-CO')}</td>
     </tr>
   `).join('');
 
@@ -373,6 +380,7 @@ function abrirFacturaImprimible(cuenta) {
             <div class="datos-cliente">
         <span>Cliente</span>
         ${escaparHTML(cuenta.propietario)}
+        ${cuenta.paciente ? `<br><span>Paciente</span>${escaparHTML(cuenta.paciente)}` : ''}
         <br><br>
         <span class="estado-factura" style="background:${cuenta.estado === 'pagada' ? '#e2f5ea' : cuenta.estado === 'parcial' ? '#fff6e0' : '#fdecea'}; color:${cuenta.estado === 'pagada' ? '#1d9e75' : cuenta.estado === 'parcial' ? '#93690a' : '#a83226'};">
           ${cuenta.estado}
@@ -389,10 +397,10 @@ function abrirFacturaImprimible(cuenta) {
       </table>
 
       <div class="resumen-factura">
-        <p><span>Subtotal</span><span>$${Number(cuenta.subtotal).toLocaleString()}</span></p>
-        <p class="total-final"><span>Total</span><span>$${Number(cuenta.total).toLocaleString()}</span></p>
-        <p><span>Pagado</span><span>$${totalPagado.toLocaleString()}</span></p>
-        <p><span>Saldo pendiente</span><span>$${saldo.toLocaleString()}</span></p>
+        <p><span>Subtotal</span><span>$${Number(cuenta.subtotal).toLocaleString('es-CO')}</span></p>
+        <p class="total-final"><span>Total</span><span>$${Number(cuenta.total).toLocaleString('es-CO')}</span></p>
+        <p><span>Pagado</span><span>$${totalPagado.toLocaleString('es-CO')}</span></p>
+        <p><span>Saldo pendiente</span><span>$${saldo.toLocaleString('es-CO')}</span></p>
       </div>
 
       ${filasPagos}

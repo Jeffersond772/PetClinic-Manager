@@ -86,6 +86,19 @@
             <button type="button" id="btnAgregarTratamiento" class="btn-icono">+ Agregar tratamiento</button>
           </div>
           <div id="listaTratamientosForm"></div>
+          <p class="texto-secundario ayuda-facturacion">Los productos seleccionados del inventario se cobrarán con el
+            precio configurado en Inventario. Los medicamentos escritos manualmente quedan en la fórmula, pero no se
+            facturan porque no tienen precio de catálogo.</p>
+        </div>
+
+        <div class="separador-tratamientos">
+          <div class="encabezado-tratamientos">
+            <label>Servicios realizados que se cobrarán en Ventas</label>
+            <button type="button" id="btnAgregarServicioConsulta" class="btn-icono">+ Agregar servicio</button>
+          </div>
+          <div id="listaServiciosConsulta"></div>
+          <p class="texto-secundario ayuda-facturacion">Selecciona servicios del catálogo, como consulta, curación,
+            radiografía u otros. Su precio se tomará del módulo Servicios.</p>
         </div>
 
         <p id="mensajeErrorConsulta" class="error-mensaje"></p>
@@ -115,8 +128,15 @@
           <option value="">Ninguno / no aplica</option>
         </select>
 
-        <label for="cantidadProcedimiento">Cantidad usada</label>
-        <input type="number" step="0.01" id="cantidadProcedimiento">
+        <label for="cantidadProcedimiento">Cantidad usada del producto</label>
+        <input type="number" step="0.01" min="0.01" id="cantidadProcedimiento">
+
+        <label for="servicioProcedimiento">Servicio realizado (opcional; se cobrará en Ventas)</label>
+        <select id="servicioProcedimiento">
+          <option value="">No cobrar un servicio adicional</option>
+        </select>
+        <p class="texto-secundario ayuda-facturacion">Si seleccionas producto y servicio, ambos se registrarán como
+          líneas separadas en la venta. El servicio se factura como una unidad.</p>
 
         <label for="fechaProcedimiento">Fecha</label>
         <input type="date" id="fechaProcedimiento" required max="">

@@ -2,12 +2,14 @@ const db = require('../config/db');
 
 async function listar() {
   const [rows] = await db.query(
-    `SELECT c.id_cuenta, c.fecha, c.subtotal, c.total, c.estado,
+    `SELECT c.id_cuenta, c.id_paciente, c.fecha, c.subtotal, c.total, c.estado,
             pr.id_propietario, pr.nombre AS propietario,
+            pa.nombre AS paciente,
             u.nombre AS registrado_por,
             COALESCE((SELECT SUM(monto) FROM pagos WHERE id_cuenta = c.id_cuenta), 0) AS total_pagado
      FROM cuentas c
      JOIN propietarios pr ON pr.id_propietario = c.id_propietario
+     LEFT JOIN pacientes pa ON pa.id_paciente = c.id_paciente
      JOIN usuarios u ON u.id_usuario = c.id_usuario
      ORDER BY c.fecha DESC`
   );
@@ -16,9 +18,10 @@ async function listar() {
 
 async function obtenerPorId(id_cuenta) {
   const [cuentas] = await db.query(
-    `SELECT c.*, pr.nombre AS propietario, u.nombre AS registrado_por
+    `SELECT c.*, pr.nombre AS propietario, pa.nombre AS paciente, u.nombre AS registrado_por
      FROM cuentas c
      JOIN propietarios pr ON pr.id_propietario = c.id_propietario
+     LEFT JOIN pacientes pa ON pa.id_paciente = c.id_paciente
      JOIN usuarios u ON u.id_usuario = c.id_usuario
      WHERE c.id_cuenta = ?`,
     [id_cuenta]
@@ -27,7 +30,7 @@ async function obtenerPorId(id_cuenta) {
   const cuenta = cuentas[0];
   if (!cuenta) return null;
 
-    const [detalle] = await db.query(
+  const [detalle] = await db.query(
     `SELECT dc.id_detalle, dc.tipo, dc.cantidad, dc.precio_unitario, dc.costo_unitario, dc.subtotal,
             p.nombre AS producto, s.nombre AS servicio,
             CASE WHEN dc.tipo = 'producto' AND dc.precio_unitario > 0
@@ -64,7 +67,7 @@ async function crear({ id_propietario, id_paciente, id_usuario, items }) {
       let precio_unitario;
       let nombreParaValidar;
 
-            if (item.tipo === 'producto') {
+      if (item.tipo === 'producto') {
         const [productos] = await conexion.query(
           `SELECT precio, costo_promedio, cantidad_disponible, nombre FROM productos WHERE id_producto = ? AND estado = 'activo' FOR UPDATE`,
           [item.id_producto]
@@ -111,12 +114,12 @@ async function crear({ id_propietario, id_paciente, id_usuario, items }) {
     const id_cuenta = resultadoCuenta.insertId;
 
     for (const item of itemsValidados) {
-            await conexion.query(
+      await conexion.query(
         `INSERT INTO detalle_cuenta (id_cuenta, tipo, id_producto, id_servicio, cantidad, precio_unitario, costo_unitario, subtotal)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [id_cuenta, item.tipo, item.tipo === 'producto' ? item.id_producto : null,
-         item.tipo === 'servicio' ? item.id_servicio : null, item.cantidad, item.precio_unitario,
-         item.tipo === 'producto' ? item.costo_unitario : null, item.subtotal]
+          item.tipo === 'servicio' ? item.id_servicio : null, item.cantidad, item.precio_unitario,
+          item.tipo === 'producto' ? item.costo_unitario : null, item.subtotal]
       );
 
       // Si es producto, se descuenta del inventario (RF3 aplicado también a ventas directas)
