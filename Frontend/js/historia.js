@@ -353,7 +353,6 @@ formProcedimiento.addEventListener('submit', async (e) => {
   }
 
   const datos = {
-      const datos = {
     id_paciente: idPaciente,
     id_cita: idCitaValida,
     motivo_consulta: document.getElementById('motivoConsulta').value || null,
