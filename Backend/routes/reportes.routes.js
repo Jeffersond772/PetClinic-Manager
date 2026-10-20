@@ -10,5 +10,10 @@ router.get('/gastos', verificarToken, verificarRol(['Administrador']), reporteCo
 router.get('/consultas', verificarToken, verificarRol(['Administrador', 'Veterinario']), reporteController.consultas);
 router.get('/productos-movimiento', verificarToken, verificarRol(['Administrador']), reporteController.productosMovimiento);
 router.get('/citas-estado', verificarToken, reporteController.citasEstado);
+router.get('/ganancia', verificarToken, verificarRol(['Administrador']), reporteController.ganancia);
+router.get('/rentabilidad', verificarToken, verificarRol(['Administrador']), reporteController.rentabilidad);
+router.get('/compras-proveedor', verificarToken, verificarRol(['Administrador']), reporteController.comprasProveedor);
+router.get('/ingresos-servicio', verificarToken, verificarRol(['Administrador']), reporteController.ingresosServicio);
+router.get('/citas-veterinario', verificarToken, verificarRol(['Administrador']), reporteController.citasVeterinario);
 
 module.exports = router;
