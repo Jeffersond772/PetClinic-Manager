@@ -88,15 +88,22 @@ function pintarTabla(citas) {
       <td>${escaparHTML(c.propietario)}</td>
       <td>${escaparHTML(c.veterinario)}</td>
       <td><span class="badge-estado badge-${c.estado}">${c.estado.replace('_', ' ')}</span></td>
-      <td>
-        ${c.estado === 'programada' ? `
+            <td>
+        ${['programada', 'en_atencion'].includes(c.estado) ? `
           <button class="btn-icono" onclick="editarCita(${c.id_cita})">Editar</button>
-          ${usuario.rol === 'Veterinario' ? `<button class="btn-icono" onclick="atenderCita(${c.id_paciente}, ${c.id_cita})">Atender</button>` : ''}
-          <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'atendida')">Atendida</button>
-          <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'no_asistio')">No asistió</button>
-          <button class="btn-icono" onclick="cancelarCita(${c.id_cita})">Cancelar</button>
+          ${usuario.rol === 'Veterinario'
+            ? `<button class="btn-icono" onclick="atenderCita(${c.id_paciente}, ${c.id_cita})">
+                 ${c.estado === 'en_atencion' ? 'Continuar consulta' : 'Atender'}
+               </button>`
+            : ''}
+          ${c.estado === 'programada' ? `
+            <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'no_asistio')">No asistió</button>
+            <button class="btn-icono" onclick="cancelarCita(${c.id_cita})">Cancelar</button>
+          ` : ''}
         ` : ''}
-        ${c.id_consulta ? `<button class="btn-icono" onclick="verConsultaCita(${c.id_consulta}, ${c.id_paciente})">Ver consulta</button>` : ''}
+        ${c.id_consulta
+          ? `<button class="btn-icono" onclick="verConsultaCita(${c.id_consulta}, ${c.id_paciente})">Ver consulta</button>`
+          : ''}
       </td>
     </tr>
   `).join('');
@@ -404,8 +411,24 @@ function irADiaEnLista(fechaStr) {
 
 // ==================== RELACIÓN CITA ↔ CONSULTA ====================
 
-function atenderCita(id_paciente, id_cita) {
-  window.location.href = `historia.html?id_paciente=${id_paciente}&id_cita=${id_cita}&nueva_consulta=1`;
+async function atenderCita(id_paciente, id_cita) {
+  const respuesta = await fetch(`${API_URL}/api/citas/${id_cita}/estado`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ estado: 'en_atencion' })
+  });
+
+  if (!respuesta.ok) {
+    const error = await respuesta.json();
+    alert(error.mensaje || 'No se pudo iniciar la atención de esta cita');
+    return;
+  }
+
+  window.location.href =
+    `historia.html?id_paciente=${id_paciente}&id_cita=${id_cita}&nueva_consulta=1`;
 }
 
 let pacienteConsultaCita = null;

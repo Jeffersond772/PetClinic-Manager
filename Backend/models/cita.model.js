@@ -63,7 +63,7 @@ async function existeConflictoHorario(id_veterinario, fecha, hora, id_cita_exclu
   let sql = `
     SELECT id_cita FROM citas
     WHERE id_veterinario = ? AND fecha = ?
-      AND estado IN ('programada', 'atendida')
+      AND estado IN ('programada', 'en_atencion', 'atendida')
       AND ABS(TIME_TO_SEC(hora) - TIME_TO_SEC(?)) < ?
   `;
   const parametros = [id_veterinario, fecha, hora, DURACION_MINIMA_MINUTOS * 60];
@@ -100,7 +100,19 @@ async function cambiarEstado(id_cita, estado) {
   await db.query(`UPDATE citas SET estado = ? WHERE id_cita = ?`, [estado, id_cita]);
 }
 
+// Cancela citas cuya hora programada venció hace una hora y que nunca iniciaron atención.
+async function cancelarCitasVencidas(ahoraLocal) {
+  const [resultado] = await db.query(
+    `UPDATE citas
+     SET estado = 'cancelada'
+     WHERE estado = 'programada'
+       AND TIMESTAMP(fecha, hora) <= DATE_SUB(?, INTERVAL 1 HOUR)`,
+    [ahoraLocal]
+  );
+  return resultado.affectedRows;
+}
+
 module.exports = {
   listar, obtenerPorId, listarPorRangoFecha, existeConflictoHorario,
-  crear, actualizar, cambiarEstado
+  crear, actualizar, cambiarEstado, cancelarCitasVencidas
 };

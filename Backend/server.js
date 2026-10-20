@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const db = require('./config/db');
 const rateLimit = require('express-rate-limit');
+const { iniciarProgramadorCitas } = require('./services/citas.scheduler');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -63,4 +64,5 @@ app.use('/api/compras', require('./routes/compras.routes'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`API corriendo en http://localhost:${PORT}`);
+  iniciarProgramadorCitas();
 });

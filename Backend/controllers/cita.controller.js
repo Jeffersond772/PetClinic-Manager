@@ -1,173 +1,233 @@
-const usuarioModel = require('../models/usuario.model');
-const citaModel = require('../models/cita.model');
-const { respuestaError } = require('../utils/manejarError');
-const { obtenerFechaHoyLocal } = require('../utils/fecha');
+const db = require('../config/db');
+const { registrarVentaHistoria } = require('../utils/ventaHistoria');
 
-async function listar(req, res) {
-  try {
-    const citas = await citaModel.listar();
-    res.json(citas);
-  } catch (error) {
-    respuestaError(res, error);
-  }
+// Busca el id_historia de un paciente (ya debería existir, se crea automático al registrar el paciente)
+async function obtenerIdHistoriaPorPaciente(id_paciente, conexion) {
+  const ejecutor = conexion || db;
+  const [rows] = await ejecutor.query(
+    `SELECT id_historia FROM historias_clinicas WHERE id_paciente = ?`,
+    [id_paciente]
+  );
+  return rows[0]?.id_historia;
 }
 
-async function obtener(req, res) {
-  try {
-    const cita = await citaModel.obtenerPorId(req.params.id);
-    if (!cita) {
-      return res.status(404).json({ mensaje: 'Cita no encontrada' });
-    }
-    res.json(cita);
-  } catch (error) {
-    respuestaError(res, error);
-  }
+async function listarPorPaciente(id_paciente) {
+  const [rows] = await db.query(
+    `SELECT c.id_consulta, c.fecha, c.motivo_consulta, c.diagnostico, u.nombre AS veterinario
+     FROM consultas c
+     JOIN usuarios u ON u.id_usuario = c.id_veterinario
+     WHERE c.id_paciente = ?
+     ORDER BY c.fecha DESC`,
+    [id_paciente]
+  );
+  return rows;
 }
 
-// CU13: GET /api/citas/agenda?desde=2026-09-01&hasta=2026-09-07&id_veterinario=3
-async function agenda(req, res) {
-  const { desde, hasta, id_veterinario } = req.query;
+async function obtenerPorId(id_consulta) {
+  const [consultas] = await db.query(
+    `SELECT c.*, p.nombre AS paciente, u.nombre AS veterinario
+     FROM consultas c
+     JOIN pacientes p ON p.id_paciente = c.id_paciente
+     JOIN usuarios u ON u.id_usuario = c.id_veterinario
+     WHERE c.id_consulta = ?`,
+    [id_consulta]
+  );
 
-  if (!desde || !hasta) {
-    return res.status(400).json({ mensaje: 'Debes indicar el rango de fechas (desde y hasta)' });
-  }
+  const consulta = consultas[0];
+  if (!consulta) return null;
 
-  try {
-    const citas = await citaModel.listarPorRangoFecha(desde, hasta, id_veterinario);
+  const [tratamientos] = await db.query(
+    `SELECT t.id_tratamiento, t.id_producto, t.nombre_medicamento, t.cantidad, t.dosis, t.indicaciones,
+            pr.nombre AS producto
+     FROM tratamientos t
+     LEFT JOIN productos pr ON pr.id_producto = t.id_producto
+     WHERE t.id_consulta = ?`,
+    [id_consulta]
+  );
 
-    if (citas.length === 0) {
-      // Flujo alternativo CU13: no existen citas programadas para el período
-      return res.json({ mensaje: 'No existen citas programadas para el período seleccionado', citas: [] });
-    }
-
-    res.json({ citas });
-  } catch (error) {
-    respuestaError(res, error);
-  }
+  consulta.tratamientos = tratamientos;
+  return consulta;
 }
 
-// CU07: agendar cita
-async function crear(req, res) {
-  const { id_paciente, id_propietario, id_veterinario, fecha, hora, motivo, forzar } = req.body;
+function cantidadValida(valor) {
+  const cantidad = Number(valor);
+  return valor !== null && valor !== undefined && valor !== '' && Number.isFinite(cantidad) && cantidad > 0;
+}
 
-  if (!id_paciente || !id_propietario || !id_veterinario || !fecha || !hora) {
-    return res.status(400).json({ mensaje: 'Paciente, propietario, veterinario, fecha y hora son obligatorios' });
-  }
-
-  const hoy = obtenerFechaHoyLocal();
-  if (fecha < hoy) {
-    return res.status(400).json({ mensaje: 'No se puede agendar una cita en una fecha anterior a hoy' });
-  }
+// CU08: registra la consulta, descuenta los productos utilizados y genera su venta en la misma transacción.
+async function crear({ id_paciente, id_veterinario, id_cita, motivo_consulta, sintomas, signos_vitales,
+  peso, diagnostico, procedimientos_realizados, observaciones, tratamientos, servicios_cobrables }) {
+  const conexion = await db.getConnection();
 
   try {
-    // Flujo alternativo CU07: horario ya ocupado
-    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora);
-    if (hayConflicto) {
-      return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
+    await conexion.beginTransaction();
+
+    const [pacientes] = await conexion.query(
+      `SELECT id_propietario FROM pacientes WHERE id_paciente = ? FOR UPDATE`,
+      [id_paciente]
+    );
+
+    if (pacientes.length === 0) {
+      const error = new Error('El paciente indicado no existe');
+      error.codigoNegocio = 'PACIENTE_NO_EXISTE';
+      throw error;
     }
 
-    // Horario laboral del veterinario (un Administrador puede forzar la excepción)
-    const infoHorario = await usuarioModel.estaDentroDeHorarioLaboral(id_veterinario, hora);
-    const puedeForzar = req.usuario.rol === 'Administrador' && forzar === true;
-    if (infoHorario && !infoHorario.dentro && !puedeForzar) {
-      return res.status(400).json({
-        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0, 5)} a ${infoHorario.hora_fin_laboral.slice(0, 5)}.` +
-          (req.usuario.rol === 'Administrador' ? ' Activa "Permitir fuera de horario" si deseas agendarla de todas formas.' : ' Contacta a un administrador si necesitas un horario distinto.')
+    const id_propietario = pacientes[0].id_propietario;
+    let id_historia = await obtenerIdHistoriaPorPaciente(id_paciente, conexion);
+
+    // Si por alguna razón no tiene historia clínica, se crea aquí mismo.
+    if (!id_historia) {
+      const [resultadoHistoria] = await conexion.query(
+        `INSERT INTO historias_clinicas (id_paciente) VALUES (?)`,
+        [id_paciente]
+      );
+      id_historia = resultadoHistoria.insertId;
+    }
+
+    const [resultadoConsulta] = await conexion.query(
+      `INSERT INTO consultas
+       (id_historia, id_cita, id_paciente, id_veterinario, motivo_consulta, sintomas, signos_vitales, peso, diagnostico, procedimientos_realizados, observaciones)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id_historia, id_cita || null, id_paciente, id_veterinario, motivo_consulta || null, sintomas || null,
+        signos_vitales || null, peso || null, diagnostico || null, procedimientos_realizados || null, observaciones || null]
+    );
+
+    const id_consulta = resultadoConsulta.insertId;
+    const itemsFacturacion = [];
+
+    // Validamos y bloqueamos la cita para guardar su estado con la consulta.
+    if (id_cita) {
+      const [citas] = await conexion.query(
+        `SELECT id_cita, id_paciente, estado FROM citas WHERE id_cita = ? FOR UPDATE`,
+        [id_cita]
+      );
+      if (!citas.length || Number(citas[0].id_paciente) !== Number(id_paciente)) {
+        const error = new Error('La cita indicada no existe o no corresponde al paciente');
+        error.codigoNegocio = 'CITA_NO_VALIDA';
+        throw error;
+      }
+      if (!['programada', 'en_atencion'].includes(citas[0].estado)) {
+        const error = new Error('La cita no está disponible para registrar una consulta');
+        error.codigoNegocio = 'CITA_NO_DISPONIBLE';
+        throw error;
+      }
+      await conexion.query(`UPDATE citas SET estado = 'atendida' WHERE id_cita = ?`, [id_cita]);
+    }
+
+    // Cada tratamiento queda en la historia. Los medicamentos del inventario se cobran al precio del catálogo.
+    for (const t of (Array.isArray(tratamientos) ? tratamientos : [])) {
+      let producto = null;
+      let cantidadProducto = null;
+
+      if (t.id_producto) {
+        if (!cantidadValida(t.cantidad)) {
+          const error = new Error('Indica una cantidad mayor que cero para cada producto formulado');
+          error.codigoNegocio = 'CANTIDAD_INVALIDA';
+          throw error;
+        }
+
+        cantidadProducto = Number(t.cantidad);
+        const [productos] = await conexion.query(
+          `SELECT id_producto, nombre, precio, costo_promedio, cantidad_disponible
+           FROM productos WHERE id_producto = ? AND estado = 'activo' FOR UPDATE`,
+          [t.id_producto]
+        );
+
+        if (productos.length === 0) {
+          const error = new Error(`El producto con id ${t.id_producto} no está registrado en el inventario`);
+          error.codigoNegocio = 'PRODUCTO_NO_EXISTE';
+          throw error;
+        }
+
+        producto = productos[0];
+        if (Number(producto.cantidad_disponible) < cantidadProducto) {
+          const error = new Error(`Stock insuficiente para "${producto.nombre}"`);
+          error.codigoNegocio = 'STOCK_INSUFICIENTE';
+          throw error;
+        }
+      }
+
+      await conexion.query(
+        `INSERT INTO tratamientos (id_consulta, id_producto, nombre_medicamento, cantidad, dosis, indicaciones)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [id_consulta, t.id_producto || null, t.nombre_medicamento || null,
+          t.cantidad !== '' && t.cantidad !== undefined ? t.cantidad : null,
+          t.dosis || null, t.indicaciones || null]
+      );
+
+      if (producto && cantidadProducto !== null) {
+        await conexion.query(
+          `INSERT INTO movimientos_inventario (id_producto, tipo, motivo, cantidad, id_usuario, id_consulta)
+           VALUES (?, 'salida', 'consulta', ?, ?, ?)`,
+          [producto.id_producto, cantidadProducto, id_veterinario, id_consulta]
+        );
+
+        await conexion.query(
+          `UPDATE productos SET cantidad_disponible = cantidad_disponible - ? WHERE id_producto = ?`,
+          [cantidadProducto, producto.id_producto]
+        );
+
+        itemsFacturacion.push({
+          tipo: 'producto',
+          id_producto: producto.id_producto,
+          cantidad: cantidadProducto,
+          precio_unitario: Number(producto.precio),
+          costo_unitario: Number(producto.costo_promedio)
+        });
+      }
+    }
+
+    // Los procedimientos escritos como texto clínico se conservan como nota.
+    // Para cobrar un procedimiento se selecciona explícitamente un servicio del catálogo.
+    for (const s of (Array.isArray(servicios_cobrables) ? servicios_cobrables : [])) {
+      if (!s.id_servicio) continue;
+
+      if (!cantidadValida(s.cantidad)) {
+        const error = new Error('Indica una cantidad mayor que cero para cada servicio realizado');
+        error.codigoNegocio = 'CANTIDAD_INVALIDA';
+        throw error;
+      }
+
+      const [servicios] = await conexion.query(
+        `SELECT id_servicio, nombre, precio FROM servicios WHERE id_servicio = ? FOR UPDATE`,
+        [s.id_servicio]
+      );
+
+      if (servicios.length === 0) {
+        const error = new Error('Uno de los servicios seleccionados no existe en el catálogo');
+        error.codigoNegocio = 'SERVICIO_NO_EXISTE';
+        throw error;
+      }
+
+      itemsFacturacion.push({
+        tipo: 'servicio',
+        id_servicio: servicios[0].id_servicio,
+        cantidad: Number(s.cantidad),
+        precio_unitario: Number(servicios[0].precio),
+        costo_unitario: null
       });
     }
 
-    const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo });
-    res.status(201).json({ mensaje: 'Cita agendada correctamente', id_cita });
+    // La venta y sus detalles se guardan en la misma transacción de la consulta.
+    // Si falla la facturación, también se revierten la consulta y los movimientos de inventario.
+    const venta = await registrarVentaHistoria({
+      conexion,
+      id_propietario,
+      id_paciente,
+      id_usuario: id_veterinario,
+      items: itemsFacturacion
+    });
+
+    await conexion.commit();
+    return { id_consulta, ...venta };
 
   } catch (error) {
-    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-      return res.status(400).json({ mensaje: 'El paciente, propietario o veterinario indicados no existen' });
-    }
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
-    }
-    respuestaError(res, error);
+    await conexion.rollback();
+    throw error;
+  } finally {
+    conexion.release();
   }
 }
 
-// CU12: modificar cita
-async function actualizar(req, res) {
-  const { fecha, hora, motivo, id_veterinario, forzar } = req.body;
-
-  if (!fecha || !hora || !id_veterinario) {
-    return res.status(400).json({ mensaje: 'Fecha, hora y veterinario son obligatorios' });
-  }
-
-  const hoy = obtenerFechaHoyLocal();
-  if (fecha < hoy) {
-    return res.status(400).json({ mensaje: 'No se puede modificar la cita a una fecha anterior a hoy' });
-  }
-
-  try {
-    const cita = await citaModel.obtenerPorId(req.params.id);
-    if (!cita) {
-      return res.status(404).json({ mensaje: 'Cita no encontrada' });
-    }
-
-    // Flujo alternativo CU12: el nuevo horario ya está ocupado
-    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora, req.params.id);
-    if (hayConflicto) {
-      return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
-    }
-
-    const infoHorario = await usuarioModel.estaDentroDeHorarioLaboral(id_veterinario, hora);
-    const puedeForzar = req.usuario.rol === 'Administrador' && forzar === true;
-    if (infoHorario && !infoHorario.dentro && !puedeForzar) {
-      return res.status(400).json({
-        mensaje: `Este veterinario labora de ${infoHorario.hora_inicio_laboral.slice(0, 5)} a ${infoHorario.hora_fin_laboral.slice(0, 5)}.` +
-          (req.usuario.rol === 'Administrador' ? ' Activa "Permitir fuera de horario" si deseas agendarla de todas formas.' : ' Contacta a un administrador si necesitas un horario distinto.')
-      });
-    }
-
-    await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario });
-    res.json({ mensaje: 'Cita actualizada correctamente' });
-
-  } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
-    }
-    respuestaError(res, error);
-  }
-}
-
-// CU12: cancelar cita
-async function cancelar(req, res) {
-  try {
-    const cita = await citaModel.obtenerPorId(req.params.id);
-    if (!cita) {
-      return res.status(404).json({ mensaje: 'Cita no encontrada' });
-    }
-    await citaModel.cambiarEstado(req.params.id, 'cancelada');
-    res.json({ mensaje: 'Cita cancelada correctamente' });
-  } catch (error) {
-    respuestaError(res, error);
-  }
-}
-
-// Marcar como atendida o no_asistio (útil para el flujo del día de la cita)
-async function cambiarEstado(req, res) {
-  const { estado } = req.body;
-  const estadosValidos = ['programada', 'atendida', 'cancelada', 'no_asistio'];
-
-  if (!estadosValidos.includes(estado)) {
-    return res.status(400).json({ mensaje: 'Estado inválido' });
-  }
-
-  try {
-    const cita = await citaModel.obtenerPorId(req.params.id);
-    if (!cita) {
-      return res.status(404).json({ mensaje: 'Cita no encontrada' });
-    }
-    await citaModel.cambiarEstado(req.params.id, estado);
-    res.json({ mensaje: 'Estado de la cita actualizado correctamente' });
-  } catch (error) {
-    respuestaError(res, error);
-  }
-}
-
-module.exports = { listar, obtener, agenda, crear, actualizar, cancelar, cambiarEstado };
+module.exports = { listarPorPaciente, obtenerPorId, crear, obtenerIdHistoriaPorPaciente };

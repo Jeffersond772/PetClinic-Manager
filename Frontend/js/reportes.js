@@ -35,8 +35,8 @@ function armarHojas(g, rent, compras, servicios, citasVet) {
       columnas: [{ t: 'Servicio' }, { t: 'Veces' }, { t: 'Total', f: dinero }],
       filas: servicios.map(s => [s.nombre, Number(s.veces), Number(s.total)]) },
     { titulo: 'Citas por veterinario',
-      columnas: [{ t: 'Veterinario' }, { t: 'Total' }, { t: 'Atendidas' }, { t: 'Programadas' }, { t: 'Canceladas' }, { t: 'No asistió' }],
-      filas: citasVet.map(c => [c.nombre, Number(c.total), Number(c.atendidas), Number(c.programadas), Number(c.canceladas), Number(c.no_asistio)]) }
+      columnas: [{ t: 'Veterinario' }, { t: 'Total' }, { t: 'Atendidas' }, { t: 'En atención' }, { t: 'Programadas' }, { t: 'Canceladas' }, { t: 'No asistió' }],
+      filas: citasVet.map(c => [c.nombre, Number(c.total), Number(c.atendidas), Number(c.en_atencion), Number(c.programadas), Number(c.canceladas), Number(c.no_asistio)]) }
   ];
 }
 

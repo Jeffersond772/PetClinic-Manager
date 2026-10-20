@@ -70,6 +70,12 @@ async function crear(req, res) {
     if (error.codigoNegocio === 'PACIENTE_NO_EXISTE') {
       return res.status(404).json({ mensaje: error.message });
     }
+    if (error.codigoNegocio === 'CITA_NO_VALIDA') {
+      return res.status(400).json({ mensaje: error.message });
+    }
+    if (error.codigoNegocio === 'CITA_NO_DISPONIBLE') {
+      return res.status(409).json({ mensaje: error.message });
+    }
     if (error.codigoNegocio === 'CANTIDAD_INVALIDA' || error.codigoNegocio === 'ITEM_FACTURACION_INVALIDO') {
       return res.status(400).json({ mensaje: error.message });
     }

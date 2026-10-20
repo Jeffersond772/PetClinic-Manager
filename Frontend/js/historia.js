@@ -279,6 +279,7 @@ formConsulta.addEventListener('submit', async (e) => {
 
   const datos = {
     id_paciente: idPaciente,
+    id_cita: idCitaValida,
     motivo_consulta: document.getElementById('motivoConsulta').value || null,
     sintomas: document.getElementById('sintomas').value || null,
     signos_vitales: document.getElementById('signosVitales').value || null,

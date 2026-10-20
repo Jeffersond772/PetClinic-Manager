@@ -96,8 +96,22 @@ async function crear({ id_paciente, id_veterinario, id_cita, motivo_consulta, si
     const id_consulta = resultadoConsulta.insertId;
     const itemsFacturacion = [];
 
-    // Si la consulta vino de una cita agendada, la marcamos como atendida.
+    // Validamos y bloqueamos la cita para guardar su estado con la consulta.
     if (id_cita) {
+      const [citas] = await conexion.query(
+        `SELECT id_cita, id_paciente, estado FROM citas WHERE id_cita = ? FOR UPDATE`,
+        [id_cita]
+      );
+      if (!citas.length || Number(citas[0].id_paciente) !== Number(id_paciente)) {
+        const error = new Error('La cita indicada no existe o no corresponde al paciente');
+        error.codigoNegocio = 'CITA_NO_VALIDA';
+        throw error;
+      }
+      if (!['programada', 'en_atencion'].includes(citas[0].estado)) {
+        const error = new Error('La cita no está disponible para registrar una consulta');
+        error.codigoNegocio = 'CITA_NO_DISPONIBLE';
+        throw error;
+      }
       await conexion.query(`UPDATE citas SET estado = 'atendida' WHERE id_cita = ?`, [id_cita]);
     }
 

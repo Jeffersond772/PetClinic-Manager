@@ -179,6 +179,7 @@ async function citasPorVeterinario(desde, hasta) {
             COUNT(*) AS total,
             SUM(c.estado = 'atendida') AS atendidas,
             SUM(c.estado = 'programada') AS programadas,
+            SUM(c.estado = 'en_atencion') AS en_atencion,
             SUM(c.estado = 'cancelada') AS canceladas,
             SUM(c.estado = 'no_asistio') AS no_asistio
      FROM citas c
