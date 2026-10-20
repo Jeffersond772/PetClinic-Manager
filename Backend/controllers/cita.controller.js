@@ -230,4 +230,12 @@ async function crear({ id_paciente, id_veterinario, id_cita, motivo_consulta, si
   }
 }
 
-module.exports = { listarPorPaciente, obtenerPorId, crear, obtenerIdHistoriaPorPaciente };
+module.exports = {
+  listar,
+  obtener,
+  agenda,
+  crear,
+  actualizar,
+  cancelar,
+  cambiarEstado
+};
