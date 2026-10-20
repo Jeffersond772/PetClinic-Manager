@@ -402,10 +402,14 @@ async function abrirConsultaDesdeCita() {
     const respuesta = await fetch(`${API_URL}/api/citas/${idCita}`, { headers: { 'Authorization': `Bearer ${token}` } });
     const cita = await respuesta.json();
 
-    if (!respuesta.ok || String(cita.id_paciente) !== String(idPaciente) || cita.estado !== 'programada') {
-      mostrarAlerta('Esa cita ya no está programada o no corresponde a este paciente. Puedes registrar la consulta sin vincularla.');
-      return;
-    }
+    if (
+  !respuesta.ok ||
+  String(cita.id_paciente) !== String(idPaciente) ||
+  !['programada', 'en_atencion'].includes(cita.estado)
+) {
+  mostrarAlerta('Esa cita ya no está disponible para atención o no corresponde a este paciente. Puedes registrar la consulta sin vincularla.');
+  return;
+}
     idCitaValida = cita.id_cita;
     document.getElementById('btnNuevaConsulta').click();
     document.getElementById('motivoConsulta').value = cita.motivo || '';
