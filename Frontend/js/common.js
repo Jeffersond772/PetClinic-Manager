@@ -182,6 +182,80 @@ function mostrarCargando(elementoTbody, columnas) {
   elementoTbody.innerHTML = `<tr><td colspan="${columnas}" class="tabla-cargando"><span class="spinner"></span> Cargando...</td></tr>`;
 }
 
+// ==================== BUSCADOR AUTOMÁTICO EN TABLAS ====================
+
+const TABLAS_CON_BUSCADOR = {
+  tablaCitas: 'Buscar cita por paciente, propietario o veterinario...',
+  tablaCuentas: 'Buscar venta por propietario, paciente o estado...',
+  tablaGastos: 'Buscar gasto...',
+  tablaServicios: 'Buscar servicio...',
+  tablaUsuarios: 'Buscar usuario por nombre, correo o rol...',
+  tablaProveedores: 'Buscar proveedor...',
+  tablaCompras: 'Buscar compra...'
+};
+
+function normalizarTexto(texto) {
+  return String(texto).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function activarBuscadorTabla(idTbody, placeholder) {
+  const tbody = document.getElementById(idTbody);
+  if (!tbody) return;
+  const tabla = tbody.closest('table');
+
+  const caja = document.createElement('div');
+  caja.className = 'buscador buscador-auto';
+  caja.innerHTML = `<input type="search" placeholder="${placeholder}" aria-label="Buscar en la tabla"><small class="contador-busqueda texto-secundario"></small>`;
+  tabla.parentNode.insertBefore(caja, tabla);
+
+  const input = caja.querySelector('input');
+  const contador = caja.querySelector('.contador-busqueda');
+
+  function filtrar() {
+    const texto = normalizarTexto(input.value.trim());
+    let visibles = 0, total = 0;
+
+    tbody.querySelectorAll('tr').forEach(fila => {
+      if (fila.querySelector('td[colspan]')) { fila.style.display = ''; return; } // cargando / vacío / error
+      total++;
+      const coincide = normalizarTexto(fila.textContent).includes(texto);
+      fila.style.display = coincide ? '' : 'none';
+      if (coincide) visibles++;
+    });
+
+    if (!texto || total === 0) contador.textContent = '';
+    else contador.textContent = visibles === 0 ? 'Sin resultados' : `${visibles} de ${total}`;
+  }
+
+  input.addEventListener('input', filtrar);
+  new MutationObserver(filtrar).observe(tbody, { childList: true });
+}
+
+Object.entries(TABLAS_CON_BUSCADOR).forEach(([id, placeholder]) => activarBuscadorTabla(id, placeholder));
+
+// ---- Atajos de teclado: "/" enfoca el buscador, Esc limpia el buscador o cierra el modal abierto ----
+document.addEventListener('keydown', (e) => {
+  const activo = document.activeElement;
+  const escribiendo = ['INPUT', 'TEXTAREA', 'SELECT'].includes(activo.tagName);
+
+  if (e.key === '/' && !escribiendo) {
+    const buscador = document.querySelector('.buscador input');
+    if (buscador) { e.preventDefault(); buscador.focus(); }
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    if (activo.matches && activo.matches('.buscador input')) {
+      activo.value = '';
+      activo.dispatchEvent(new Event('input'));
+      activo.blur();
+      return;
+    }
+    const abiertos = [...document.querySelectorAll('.modal-overlay:not(.oculto)')].filter(m => m !== modalConfirmGlobal);
+    if (abiertos.length > 0) abiertos[abiertos.length - 1].classList.add('oculto');
+  }
+});
+
 // ---- Modo oscuro ----
 const modoGuardado = localStorage.getItem('modoOscuro');
 if (modoGuardado === '1') {

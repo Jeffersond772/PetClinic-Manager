@@ -33,7 +33,7 @@ async function obtenerPorId(id_cuenta) {
   const [detalle] = await db.query(
     `SELECT dc.id_detalle, dc.tipo, dc.cantidad, dc.precio_unitario, dc.costo_unitario, dc.subtotal,
             p.nombre AS producto, s.nombre AS servicio,
-            CASE WHEN dc.tipo = 'producto' AND dc.precio_unitario > 0
+              CASE WHEN dc.tipo = 'producto' AND dc.precio_unitario > 0 AND dc.costo_unitario > 0
                  THEN ROUND(((dc.precio_unitario - dc.costo_unitario) / dc.precio_unitario) * 100, 1)
                  ELSE NULL END AS margen_porcentaje
      FROM detalle_cuenta dc

@@ -30,14 +30,16 @@ async function obtenerPorId(id_cita) {
 
 // CU13: agenda por rango de fechas (sirve para vista diaria, semanal o mensual según lo que mande el Frontend)
 async function listarPorRangoFecha(fechaInicio, fechaFin, id_veterinario) {
-  let sql = `
+    let sql = `
     SELECT c.id_cita, c.fecha, c.hora, c.motivo, c.estado,
-           p.nombre AS paciente, pr.nombre AS propietario,
-           u.id_usuario AS id_veterinario, u.nombre AS veterinario
+           p.id_paciente, p.nombre AS paciente, pr.nombre AS propietario,
+           u.id_usuario AS id_veterinario, u.nombre AS veterinario,
+           co.id_consulta
     FROM citas c
     JOIN pacientes p ON p.id_paciente = c.id_paciente
     JOIN propietarios pr ON pr.id_propietario = c.id_propietario
     JOIN usuarios u ON u.id_usuario = c.id_veterinario
+    LEFT JOIN consultas co ON co.id_cita = c.id_cita
     WHERE c.fecha BETWEEN ? AND ?
   `;
   const parametros = [fechaInicio, fechaFin];

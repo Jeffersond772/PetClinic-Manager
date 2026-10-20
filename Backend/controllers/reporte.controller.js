@@ -87,4 +87,23 @@ async function citasEstado(req, res) {
   }
 }
 
-module.exports = { ingresos, gastos, consultas, productosMovimiento, resumen, citasEstado };
+function crearHandler(funcionModelo) {
+  return async (req, res) => {
+    const rango = validarRango(req, res);
+    if (!rango) return;
+    try {
+      res.json(await funcionModelo(rango.desde, rango.hasta));
+    } catch (error) {
+      respuestaError(res, error);
+    }
+  };
+}
+
+const ganancia = crearHandler(reporteModel.gananciaReal);
+const rentabilidad = crearHandler(reporteModel.rentabilidadProductos);
+const comprasProveedor = crearHandler(reporteModel.comprasPorProveedor);
+const ingresosServicio = crearHandler(reporteModel.ingresosPorServicio);
+const citasVeterinario = crearHandler(reporteModel.citasPorVeterinario);
+
+module.exports = { ingresos, gastos, consultas, productosMovimiento, resumen, citasEstado,
+  ganancia, rentabilidad, comprasProveedor, ingresosServicio, citasVeterinario };

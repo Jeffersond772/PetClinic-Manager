@@ -91,10 +91,12 @@ function pintarTabla(citas) {
       <td>
         ${c.estado === 'programada' ? `
           <button class="btn-icono" onclick="editarCita(${c.id_cita})">Editar</button>
+          ${usuario.rol === 'Veterinario' ? `<button class="btn-icono" onclick="atenderCita(${c.id_paciente}, ${c.id_cita})">Atender</button>` : ''}
           <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'atendida')">Atendida</button>
           <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'no_asistio')">No asistió</button>
           <button class="btn-icono" onclick="cancelarCita(${c.id_cita})">Cancelar</button>
         ` : ''}
+        ${c.id_consulta ? `<button class="btn-icono" onclick="verConsultaCita(${c.id_consulta}, ${c.id_paciente})">Ver consulta</button>` : ''}
       </td>
     </tr>
   `).join('');
@@ -399,3 +401,54 @@ function irADiaEnLista(fechaStr) {
   cargarAgenda();
   btnVistaLista.click();
 }
+
+// ==================== RELACIÓN CITA ↔ CONSULTA ====================
+
+function atenderCita(id_paciente, id_cita) {
+  window.location.href = `historia.html?id_paciente=${id_paciente}&id_cita=${id_cita}&nueva_consulta=1`;
+}
+
+let pacienteConsultaCita = null;
+
+async function verConsultaCita(id_consulta, id_paciente) {
+  pacienteConsultaCita = id_paciente;
+  const contenido = document.getElementById('contenidoConsultaCita');
+  contenido.textContent = 'Cargando...';
+  document.getElementById('modalConsultaCita').classList.remove('oculto');
+
+  try {
+    const respuesta = await fetch(`${API_URL}/api/consultas/${id_consulta}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const c = await respuesta.json();
+    if (!respuesta.ok) {
+      contenido.textContent = c.mensaje || 'No se pudo cargar la consulta';
+      return;
+    }
+
+    const linea = (etiqueta, valor) => valor ? `<p><strong>${etiqueta}:</strong> ${escaparHTML(valor)}</p>` : '';
+    contenido.innerHTML = `
+      <p class="texto-secundario">${escaparHTML(c.paciente)} · Atendió ${escaparHTML(c.veterinario)} · ${String(c.fecha).split('T')[0]}</p>
+      ${linea('Motivo', c.motivo_consulta)}
+      ${linea('Síntomas', c.sintomas)}
+      ${linea('Signos vitales', c.signos_vitales)}
+      ${linea('Peso', c.peso ? c.peso + ' kg' : '')}
+      ${linea('Diagnóstico', c.diagnostico)}
+      ${linea('Procedimientos / notas', c.procedimientos_realizados)}
+      ${linea('Observaciones', c.observaciones)}
+      ${c.tratamientos && c.tratamientos.length ? `
+        <p><strong>Tratamientos:</strong></p>
+        <ul>${c.tratamientos.map(t => `<li>${escaparHTML(t.producto || t.nombre_medicamento || 'Medicamento')}${t.cantidad ? ' (x' + escaparHTML(t.cantidad) + ')' : ''}${t.dosis ? ' — ' + escaparHTML(t.dosis) : ''}</li>`).join('')}</ul>` : ''}
+    `;
+  } catch (error) {
+    console.error(error);
+    contenido.textContent = 'No se pudo conectar con el servidor';
+  }
+}
+
+document.getElementById('btnCerrarConsultaCita').addEventListener('click', () => {
+  document.getElementById('modalConsultaCita').classList.add('oculto');
+});
+document.getElementById('btnVerHistoriaCita').addEventListener('click', () => {
+  window.location.href = `historia.html?id_paciente=${pacienteConsultaCita}`;
+});

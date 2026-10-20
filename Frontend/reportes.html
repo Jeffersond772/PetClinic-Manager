@@ -39,11 +39,14 @@
         <div class="filtro-botones">
           <button id="btnMesActual" class="btn-secundario">Este mes</button>
           <button id="btnUltimos30" class="btn-secundario">Últimos 30 días</button>
+          <button id="btnExportarExcel" class="btn-secundario">Exportar Excel</button>
+          <button id="btnExportarPDF" class="btn-secundario">Exportar PDF</button>
         </div>
       </div>
 
       <div class="tarjetas-resumen" id="tarjetasResumen"></div>
 
+            <div class="tarjetas-resumen" id="tarjetasGanancia"></div>
       <div class="grid-graficos">
         <div class="tarjeta-grafico">
           <h3>Ingresos vs Gastos</h3>
@@ -62,8 +65,11 @@
           <canvas id="graficoFlujoCaja"></canvas>
         </div>
       </div>
+    <div class="grid-graficos" id="tablasReporte"></div>
     </main>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/common.js"></script>
   <script src="js/reportes.js"></script>

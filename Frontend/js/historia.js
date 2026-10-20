@@ -1,6 +1,7 @@
 const parametros = new URLSearchParams(window.location.search);
 const idPaciente = parametros.get('id_paciente');
-
+const idCita = parametros.get('id_cita');
+let idCitaValida = null;
 const fichaPaciente = document.getElementById('fichaPaciente');
 const listaConsultas = document.getElementById('listaConsultas');
 const tablaProcedimientos = document.getElementById('tablaProcedimientos');
@@ -352,7 +353,10 @@ formProcedimiento.addEventListener('submit', async (e) => {
   }
 
   const datos = {
+      const datos = {
     id_paciente: idPaciente,
+    id_cita: idCitaValida,
+    motivo_consulta: document.getElementById('motivoConsulta').value || null,
     tipo: document.getElementById('tipoProcedimiento').value,
     id_producto,
     cantidad,
@@ -382,11 +386,35 @@ formProcedimiento.addEventListener('submit', async (e) => {
     } else {
       mostrarAlerta('Procedimiento guardado. No se creó una venta porque no seleccionaste un producto del inventario ni un servicio cobrable.');
     }
+    if (idCitaValida) {
+      document.getElementById('btnAlertaOk').onclick = () => { window.location.href = 'citas.html'; };
+      idCitaValida = null;
+    }
   } catch (error) {
     console.error(error);
     mensajeErrorProcedimiento.textContent = 'No se pudo conectar con el servidor';
   }
 });
+
+// ---- Carga inicial ----
+async function abrirConsultaDesdeCita() {
+  try {
+    const respuesta = await fetch(`${API_URL}/api/citas/${idCita}`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const cita = await respuesta.json();
+
+    if (!respuesta.ok || String(cita.id_paciente) !== String(idPaciente) || cita.estado !== 'programada') {
+      mostrarAlerta('Esa cita ya no está programada o no corresponde a este paciente. Puedes registrar la consulta sin vincularla.');
+      return;
+    }
+    idCitaValida = cita.id_cita;
+    document.getElementById('btnNuevaConsulta').click();
+    document.getElementById('motivoConsulta').value = cita.motivo || '';
+    const titulo = modalConsulta.querySelector('h3');
+    if (titulo) titulo.textContent = `Registrar consulta (cita #${cita.id_cita})`;
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 // ---- Carga inicial ----
 (async function iniciarHistoria() {
@@ -397,4 +425,5 @@ formProcedimiento.addEventListener('submit', async (e) => {
     mostrarAlerta('No se pudieron cargar los productos o servicios. La historia clínica se abrirá, pero verifica el catálogo antes de registrar elementos para cobrar.');
   }
   await cargarHistoria();
+  if (idCita && parametros.get('nueva_consulta') === '1') await abrirConsultaDesdeCita();
 })();

@@ -2104,6 +2104,10 @@ body.modo-oscuro a:focus-visible {
   }
 }
 
+.buscador-auto { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+.buscador-auto input { flex: 1; max-width: 420px; }
+.contador-busqueda { white-space: nowrap; }
+
 body.modo-oscuro .fila-formula {
   border-color: #303338;
 }

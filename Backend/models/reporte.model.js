@@ -114,4 +114,82 @@ async function citasPorEstado(desde, hasta) {
   return rows;
 }
 
-module.exports = { ingresosPorPeriodo, gastosPorPeriodo, consultasPorPeriodo, productosMayorMovimiento, resumenGeneral, citasPorEstado };
+// Ganancia real = ventas facturadas - costo de lo vendido - gastos operativos
+async function gananciaReal(desde, hasta) {
+  const [[ventas], [costo], [gastos], [cobrado]] = await Promise.all([
+    db.query(`SELECT COALESCE(SUM(total), 0) AS total FROM cuentas WHERE DATE(fecha) BETWEEN ? AND ?`, [desde, hasta]),
+    db.query(
+      `SELECT COALESCE(SUM(dc.cantidad * dc.costo_unitario), 0) AS total
+       FROM detalle_cuenta dc JOIN cuentas c ON c.id_cuenta = dc.id_cuenta
+       WHERE dc.tipo = 'producto' AND DATE(c.fecha) BETWEEN ? AND ?`, [desde, hasta]),
+    db.query(`SELECT COALESCE(SUM(monto), 0) AS total FROM gastos WHERE fecha BETWEEN ? AND ?`, [desde, hasta]),
+    db.query(`SELECT COALESCE(SUM(monto), 0) AS total FROM pagos WHERE DATE(fecha) BETWEEN ? AND ?`, [desde, hasta])
+  ]);
+  const v = Number(ventas[0].total), c = Number(costo[0].total), g = Number(gastos[0].total);
+  return { ventas: v, costoMercancia: c, gastos: g, ganancia: v - c - g, cobrado: Number(cobrado[0].total) };
+}
+
+async function rentabilidadProductos(desde, hasta) {
+  const [rows] = await db.query(
+    `SELECT p.nombre,
+            SUM(dc.cantidad) AS unidades,
+            SUM(dc.subtotal) AS ingresos,
+            COALESCE(SUM(dc.cantidad * dc.costo_unitario), 0) AS costo
+     FROM detalle_cuenta dc
+     JOIN cuentas c ON c.id_cuenta = dc.id_cuenta
+     JOIN productos p ON p.id_producto = dc.id_producto
+     WHERE dc.tipo = 'producto' AND DATE(c.fecha) BETWEEN ? AND ?
+     GROUP BY p.id_producto, p.nombre
+     ORDER BY (SUM(dc.subtotal) - COALESCE(SUM(dc.cantidad * dc.costo_unitario), 0)) DESC`,
+    [desde, hasta]
+  );
+  return rows;
+}
+
+async function comprasPorProveedor(desde, hasta) {
+  const [rows] = await db.query(
+    `SELECT pr.nombre, COUNT(*) AS compras, SUM(c.total) AS total
+     FROM compras c
+     JOIN proveedores pr ON pr.id_proveedor = c.id_proveedor
+     WHERE DATE(c.fecha) BETWEEN ? AND ?
+     GROUP BY pr.id_proveedor, pr.nombre
+     ORDER BY total DESC`,
+    [desde, hasta]
+  );
+  return rows;
+}
+
+async function ingresosPorServicio(desde, hasta) {
+  const [rows] = await db.query(
+    `SELECT s.nombre, SUM(dc.cantidad) AS veces, SUM(dc.subtotal) AS total
+     FROM detalle_cuenta dc
+     JOIN cuentas c ON c.id_cuenta = dc.id_cuenta
+     JOIN servicios s ON s.id_servicio = dc.id_servicio
+     WHERE dc.tipo = 'servicio' AND DATE(c.fecha) BETWEEN ? AND ?
+     GROUP BY s.id_servicio, s.nombre
+     ORDER BY total DESC`,
+    [desde, hasta]
+  );
+  return rows;
+}
+
+async function citasPorVeterinario(desde, hasta) {
+  const [rows] = await db.query(
+    `SELECT u.nombre,
+            COUNT(*) AS total,
+            SUM(c.estado = 'atendida') AS atendidas,
+            SUM(c.estado = 'programada') AS programadas,
+            SUM(c.estado = 'cancelada') AS canceladas,
+            SUM(c.estado = 'no_asistio') AS no_asistio
+     FROM citas c
+     JOIN usuarios u ON u.id_usuario = c.id_veterinario
+     WHERE c.fecha BETWEEN ? AND ?
+     GROUP BY u.id_usuario, u.nombre
+     ORDER BY total DESC`,
+    [desde, hasta]
+  );
+  return rows;
+}
+
+module.exports = { ingresosPorPeriodo, gastosPorPeriodo, consultasPorPeriodo, productosMayorMovimiento, resumenGeneral, citasPorEstado,
+  gananciaReal, rentabilidadProductos, comprasPorProveedor, ingresosPorServicio, citasPorVeterinario };
