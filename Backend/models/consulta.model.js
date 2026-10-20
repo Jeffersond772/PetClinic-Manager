@@ -113,6 +113,11 @@ async function crear({ id_paciente, id_veterinario, id_cita, motivo_consulta, si
         throw error;
       }
       await conexion.query(`UPDATE citas SET estado = 'atendida' WHERE id_cita = ?`, [id_cita]);
+      await conexion.query(
+        `INSERT INTO auditoria_citas (id_cita, id_usuario, accion, estado_anterior, estado_nuevo, detalle)
+         VALUES (?, ?, 'consulta_finalizada', ?, 'atendida', 'Consulta clínica guardada')`,
+        [id_cita, id_veterinario, citas[0].estado]
+      );
     }
 
     // Cada tratamiento queda en la historia. Los medicamentos del inventario se cobran al precio del catálogo.

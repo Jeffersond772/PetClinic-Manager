@@ -4,6 +4,7 @@ const historiaController = require('../controllers/historia.controller');
 const { verificarToken, verificarRol } = require('../middlewares/auth.middleware');
 
 // Lectura: Veterinario y Administrador (Empleado no gestiona historias clínicas según tu documento)
+router.get('/seguimientos', verificarToken, verificarRol(['Veterinario', 'Administrador', 'Empleado']), historiaController.seguimientos);
 router.get('/paciente/:idPaciente', verificarToken, verificarRol(['Veterinario', 'Administrador']), historiaController.obtenerHistoria);
 
 // CU15: solo el Veterinario registra procedimientos preventivos

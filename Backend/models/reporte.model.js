@@ -192,5 +192,17 @@ async function citasPorVeterinario(desde, hasta) {
   return rows;
 }
 
+async function pendientesOperativos() {
+  const [[enAtencion], [bajoStock]] = await Promise.all([
+    db.query(`SELECT c.id_cita, c.fecha, c.hora, p.nombre AS paciente, u.nombre AS veterinario
+              FROM citas c JOIN pacientes p ON p.id_paciente = c.id_paciente
+              JOIN usuarios u ON u.id_usuario = c.id_veterinario
+              WHERE c.estado = 'en_atencion' ORDER BY c.fecha, c.hora`),
+    db.query(`SELECT id_producto, nombre, cantidad_disponible, stock_minimo FROM productos
+              WHERE estado = 'activo' AND cantidad_disponible <= stock_minimo ORDER BY nombre LIMIT 50`)
+  ]);
+  return { citasEnAtencion: enAtencion, productosBajoStock: bajoStock };
+}
+
 module.exports = { ingresosPorPeriodo, gastosPorPeriodo, consultasPorPeriodo, productosMayorMovimiento, resumenGeneral, citasPorEstado,
-  gananciaReal, rentabilidadProductos, comprasPorProveedor, ingresosPorServicio, citasPorVeterinario };
+  gananciaReal, rentabilidadProductos, comprasPorProveedor, ingresosPorServicio, citasPorVeterinario, pendientesOperativos };

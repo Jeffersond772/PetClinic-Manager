@@ -44,7 +44,7 @@ async function obtenerPorPaciente(id_paciente) {
 
   // CU15: vacunas, desparasitaciones y otros procedimientos preventivos
   const [procedimientos] = await db.query(
-    `SELECT pp.id_procedimiento, pp.tipo, pp.cantidad, pp.fecha, pp.observaciones,
+    `SELECT pp.id_procedimiento, pp.tipo, pp.cantidad, pp.fecha, pp.fecha_proxima, pp.observaciones,
             u.nombre AS veterinario, pr.nombre AS producto
      FROM procedimientos_preventivos pp
      JOIN historias_clinicas h ON h.id_historia = pp.id_historia
@@ -60,7 +60,7 @@ async function obtenerPorPaciente(id_paciente) {
 
 // CU15: registra vacuna/desparasitación/procedimiento y factura producto/servicio en la misma transacción.
 async function registrarProcedimientoPreventivo({
-  id_paciente, tipo, id_producto, cantidad, id_servicio, id_veterinario, fecha, observaciones
+  id_paciente, tipo, id_producto, cantidad, id_servicio, id_veterinario, fecha, fecha_proxima, observaciones
 }) {
   const conexion = await db.getConnection();
 
@@ -129,9 +129,9 @@ async function registrarProcedimientoPreventivo({
     }
 
     const [resultado] = await conexion.query(
-      `INSERT INTO procedimientos_preventivos (id_historia, tipo, id_producto, cantidad, id_veterinario, fecha, observaciones)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id_historia, tipo, id_producto || null, id_producto ? cantidadProducto : (cantidad || null), id_veterinario, fecha, observaciones || null]
+      `INSERT INTO procedimientos_preventivos (id_historia, tipo, id_producto, cantidad, id_veterinario, fecha, fecha_proxima, observaciones)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id_historia, tipo, id_producto || null, id_producto ? cantidadProducto : (cantidad || null), id_veterinario, fecha, fecha_proxima || null, observaciones || null]
     );
 
     // El producto aplicado se descuenta una sola vez aquí. El registro de venta no vuelve a tocar el stock.
@@ -185,4 +185,21 @@ async function registrarProcedimientoPreventivo({
     conexion.release();
   }
 }
-module.exports = { obtenerPorPaciente, registrarProcedimientoPreventivo };
+
+async function listarSeguimientosPreventivos(dias = 30) {
+  const [rows] = await db.query(
+    `SELECT pp.id_procedimiento, pp.tipo, pp.fecha_proxima,
+            p.id_paciente, p.nombre AS paciente, pr.nombre AS propietario, pr.telefono AS telefono_propietario
+     FROM procedimientos_preventivos pp
+     JOIN historias_clinicas h ON h.id_historia = pp.id_historia
+     JOIN pacientes p ON p.id_paciente = h.id_paciente
+     JOIN propietarios pr ON pr.id_propietario = p.id_propietario
+     WHERE pp.fecha_proxima IS NOT NULL
+       AND pp.fecha_proxima <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+     ORDER BY pp.fecha_proxima, p.nombre`,
+    [dias]
+  );
+  return rows;
+}
+
+module.exports = { obtenerPorPaciente, registrarProcedimientoPreventivo, listarSeguimientosPreventivos };

@@ -1,5 +1,6 @@
 const usuarioModel = require('../models/usuario.model');
 const citaModel = require('../models/cita.model');
+const auditoriaCitas = require('../models/auditoriaCitas.model');
 const { respuestaError } = require('../utils/manejarError');
 const { obtenerFechaHoyLocal } = require('../utils/fecha');
 
@@ -49,9 +50,13 @@ async function agenda(req, res) {
 // CU07: agendar cita
 async function crear(req, res) {
   const { id_paciente, id_propietario, id_veterinario, fecha, hora, motivo, forzar } = req.body;
+  const duracion_minutos = Number(req.body.duracion_minutos || 30);
 
   if (!id_paciente || !id_propietario || !id_veterinario || !fecha || !hora) {
     return res.status(400).json({ mensaje: 'Paciente, propietario, veterinario, fecha y hora son obligatorios' });
+  }
+  if (!Number.isInteger(duracion_minutos) || duracion_minutos < 10 || duracion_minutos > 240) {
+    return res.status(400).json({ mensaje: 'La duración debe ser un número entero entre 10 y 240 minutos' });
   }
 
   const hoy = obtenerFechaHoyLocal();
@@ -61,7 +66,7 @@ async function crear(req, res) {
 
   try {
     // Flujo alternativo CU07: horario ya ocupado
-    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora);
+    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora, null, duracion_minutos);
     if (hayConflicto) {
       return res.status(409).json({ mensaje: 'El horario seleccionado ya está ocupado para este veterinario' });
     }
@@ -76,7 +81,8 @@ async function crear(req, res) {
       });
     }
 
-    const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo });
+    const id_cita = await citaModel.crear({ id_paciente, id_propietario, id_veterinario, fecha, hora, motivo, duracion_minutos });
+    await auditoriaCitas.registrar({ id_cita, id_usuario: req.usuario.id_usuario, accion: 'creada', estado_nuevo: 'programada', detalle: `${fecha} ${hora}` });
     res.status(201).json({ mensaje: 'Cita agendada correctamente', id_cita });
 
   } catch (error) {
@@ -93,9 +99,13 @@ async function crear(req, res) {
 // CU12: modificar cita
 async function actualizar(req, res) {
   const { fecha, hora, motivo, id_veterinario, forzar } = req.body;
+  const duracion_minutos = Number(req.body.duracion_minutos || 30);
 
   if (!fecha || !hora || !id_veterinario) {
     return res.status(400).json({ mensaje: 'Fecha, hora y veterinario son obligatorios' });
+  }
+  if (!Number.isInteger(duracion_minutos) || duracion_minutos < 10 || duracion_minutos > 240) {
+    return res.status(400).json({ mensaje: 'La duración debe ser un número entero entre 10 y 240 minutos' });
   }
 
   const hoy = obtenerFechaHoyLocal();
@@ -110,7 +120,7 @@ async function actualizar(req, res) {
     }
 
     // Flujo alternativo CU12: el nuevo horario ya está ocupado
-    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora, req.params.id);
+    const hayConflicto = await citaModel.existeConflictoHorario(id_veterinario, fecha, hora, req.params.id, duracion_minutos);
     if (hayConflicto) {
       return res.status(409).json({ mensaje: 'El nuevo horario ya está ocupado para este veterinario' });
     }
@@ -124,7 +134,8 @@ async function actualizar(req, res) {
       });
     }
 
-    await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario });
+    await citaModel.actualizar(req.params.id, { fecha, hora, motivo, id_veterinario, duracion_minutos });
+    await auditoriaCitas.registrar({ id_cita: req.params.id, id_usuario: req.usuario.id_usuario, accion: 'reprogramada', detalle: `${fecha} ${hora}; duración ${duracion_minutos} min` });
     res.json({ mensaje: 'Cita actualizada correctamente' });
 
   } catch (error) {
@@ -143,6 +154,7 @@ async function cancelar(req, res) {
       return res.status(404).json({ mensaje: 'Cita no encontrada' });
     }
     await citaModel.cambiarEstado(req.params.id, 'cancelada');
+    await auditoriaCitas.registrar({ id_cita: req.params.id, id_usuario: req.usuario.id_usuario, accion: 'cancelada', estado_anterior: cita.estado, estado_nuevo: 'cancelada' });
     res.json({ mensaje: 'Cita cancelada correctamente' });
   } catch (error) {
     respuestaError(res, error);
@@ -170,10 +182,18 @@ async function cambiarEstado(req, res) {
       return res.status(409).json({ mensaje: 'Solo se puede registrar inasistencia en una cita programada' });
     }
     await citaModel.cambiarEstado(req.params.id, estado);
+    await auditoriaCitas.registrar({ id_cita: req.params.id, id_usuario: req.usuario.id_usuario, accion: estado === 'en_atencion' ? 'inicio_atencion' : estado, estado_anterior: cita.estado, estado_nuevo: estado });
     res.json({ mensaje: 'Estado de la cita actualizado correctamente' });
   } catch (error) {
     respuestaError(res, error);
   }
 }
 
-module.exports = { listar, obtener, agenda, crear, actualizar, cancelar, cambiarEstado };
+async function auditoria(req, res) {
+  const { desde, hasta } = req.query;
+  if (!desde || !hasta) return res.status(400).json({ mensaje: 'Debes indicar desde y hasta' });
+  try { res.json(await auditoriaCitas.listar(desde, hasta)); }
+  catch (error) { respuestaError(res, error); }
+}
+
+module.exports = { listar, obtener, agenda, crear, actualizar, cancelar, cambiarEstado, auditoria };

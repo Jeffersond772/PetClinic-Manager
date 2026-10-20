@@ -24,7 +24,7 @@
     <nav class="sidebar" id="sidebarMenu"></nav>
 
     <main class="contenido">
-            <div class="encabezado-seccion">
+      <div class="encabezado-seccion">
         <h2>Agenda de citas</h2>
         <div>
           <button id="btnVistaLista" class="btn-secundario vista-activa">Vista lista</button>
@@ -34,41 +34,52 @@
       </div>
 
       <div id="vistaListaContainer">
-      <div class="filtros-agenda">
-        <div>
-          <label for="filtroDesde">Desde</label>
-          <input type="date" id="filtroDesde">
+        <div class="filtros-agenda">
+          <div>
+            <label for="filtroDesde">Desde</label>
+            <input type="date" id="filtroDesde">
+          </div>
+          <div>
+            <label for="filtroHasta">Hasta</label>
+            <input type="date" id="filtroHasta">
+          </div>
+          <div>
+            <label for="filtroVeterinario">Veterinario</label>
+            <select id="filtroVeterinario">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div>
+            <label for="filtroEstado">Estado</label>
+            <select id="filtroEstado">
+              <option value="">Todos</option>
+              <option value="programada">Programada</option>
+              <option value="en_atencion">En atención</option>
+              <option value="atendida">Atendida</option>
+              <option value="cancelada">Cancelada</option>
+              <option value="no_asistio">No asistió</option>
+            </select>
+          </div>
+          <div class="filtro-botones">
+            <button id="btnHoy" class="btn-secundario">Hoy</button>
+            <button id="btnSemana" class="btn-secundario">Esta semana</button>
+          </div>
         </div>
-        <div>
-          <label for="filtroHasta">Hasta</label>
-          <input type="date" id="filtroHasta">
-        </div>
-        <div>
-          <label for="filtroVeterinario">Veterinario</label>
-          <select id="filtroVeterinario">
-            <option value="">Todos</option>
-          </select>
-        </div>
-        <div class="filtro-botones">
-          <button id="btnHoy" class="btn-secundario">Hoy</button>
-          <button id="btnSemana" class="btn-secundario">Esta semana</button>
-        </div>
-      </div>
 
-      <table class="tabla-datos">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Paciente</th>
-            <th>Propietario</th>
-            <th>Veterinario</th>
-            <th>Estado</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tablaCitas"></tbody>
-            </table>
+        <table class="tabla-datos">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Propietario</th>
+              <th>Veterinario</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tablaCitas"></tbody>
+        </table>
       </div>
 
       <div id="vistaCalendarioContainer" class="calendario-container oculto">
@@ -121,6 +132,9 @@
         <label for="horaCita">Hora</label>
         <input type="time" id="horaCita" required>
 
+        <label for="duracionCita">Duración estimada (minutos)</label>
+        <input type="number" id="duracionCita" min="10" max="240" step="5" value="30" required>
+
         <label for="motivoCita">Motivo</label>
         <input type="text" id="motivoCita">
 
@@ -133,8 +147,8 @@
       </form>
     </div>
   </div>
-  
-    <!-- Modal: resumen de la consulta de una cita -->
+
+  <!-- Modal: resumen de la consulta de una cita -->
   <div id="modalConsultaCita" class="modal-overlay oculto">
     <div class="modal-caja">
       <h3>Consulta de la cita</h3>

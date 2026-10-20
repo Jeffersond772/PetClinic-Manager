@@ -5,6 +5,7 @@ const { verificarToken, verificarRol } = require('../middlewares/auth.middleware
 
 // Lectura: cualquier rol autenticado
 router.get('/agenda', verificarToken, citaController.agenda);
+router.get('/auditoria', verificarToken, verificarRol(['Administrador']), citaController.auditoria);
 router.get('/', verificarToken, citaController.listar);
 router.get('/:id', verificarToken, citaController.obtener);
 

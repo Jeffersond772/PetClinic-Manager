@@ -3,6 +3,8 @@ const tablaCitas = document.getElementById('tablaCitas');
 const filtroDesde = document.getElementById('filtroDesde');
 const filtroHasta = document.getElementById('filtroHasta');
 const filtroVeterinario = document.getElementById('filtroVeterinario');
+const filtroEstado = document.getElementById('filtroEstado');
+let citasCargadas = [];
 
 const modalCita = document.getElementById('modalCita');
 const formCita = document.getElementById('formCita');
@@ -65,12 +67,18 @@ async function cargarAgenda() {
     }
 
     const resultado = await respuesta.json();
-    pintarTabla(resultado.citas);
+    citasCargadas = resultado.citas || [];
+    aplicarFiltroEstado();
 
   } catch (error) {
     console.error(error);
     tablaCitas.innerHTML = `<tr><td colspan="7" class="tabla-vacia">No se pudo conectar con el servidor</td></tr>`;
   }
+}
+
+function aplicarFiltroEstado() {
+  const estado = filtroEstado.value;
+  pintarTabla(estado ? citasCargadas.filter(c => c.estado === estado) : citasCargadas);
 }
 
 function pintarTabla(citas) {
@@ -88,22 +96,16 @@ function pintarTabla(citas) {
       <td>${escaparHTML(c.propietario)}</td>
       <td>${escaparHTML(c.veterinario)}</td>
       <td><span class="badge-estado badge-${c.estado}">${c.estado.replace('_', ' ')}</span></td>
-            <td>
+      <td>
         ${['programada', 'en_atencion'].includes(c.estado) ? `
           <button class="btn-icono" onclick="editarCita(${c.id_cita})">Editar</button>
-          ${usuario.rol === 'Veterinario'
-            ? `<button class="btn-icono" onclick="atenderCita(${c.id_paciente}, ${c.id_cita})">
-                 ${c.estado === 'en_atencion' ? 'Continuar consulta' : 'Atender'}
-               </button>`
-            : ''}
+          ${usuario.rol === 'Veterinario' ? `<button class="btn-icono" onclick="atenderCita(${c.id_paciente}, ${c.id_cita})">${c.estado === 'en_atencion' ? 'Continuar consulta' : 'Atender'}</button>` : ''}
           ${c.estado === 'programada' ? `
-            <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'no_asistio')">No asistió</button>
-            <button class="btn-icono" onclick="cancelarCita(${c.id_cita})">Cancelar</button>
+          <button class="btn-icono" onclick="marcarEstado(${c.id_cita}, 'no_asistio')">No asistió</button>
+          <button class="btn-icono" onclick="cancelarCita(${c.id_cita})">Cancelar</button>
           ` : ''}
         ` : ''}
-        ${c.id_consulta
-          ? `<button class="btn-icono" onclick="verConsultaCita(${c.id_consulta}, ${c.id_paciente})">Ver consulta</button>`
-          : ''}
+        ${c.id_consulta ? `<button class="btn-icono" onclick="verConsultaCita(${c.id_consulta}, ${c.id_paciente})">Ver consulta</button>` : ''}
       </td>
     </tr>
   `).join('');
@@ -132,6 +134,7 @@ document.getElementById('btnSemana').addEventListener('click', () => {
 filtroDesde.addEventListener('change', cargarAgenda);
 filtroHasta.addEventListener('change', cargarAgenda);
 filtroVeterinario.addEventListener('change', cargarAgenda);
+filtroEstado.addEventListener('change', aplicarFiltroEstado);
 
 // ==================== AUTOCOMPLETAR PROPIETARIO ====================
 
@@ -205,6 +208,7 @@ async function editarCita(id_cita) {
   document.getElementById('idCita').value = cita.id_cita;
   document.getElementById('fechaCita').value = cita.fecha.split('T')[0];
   document.getElementById('horaCita').value = cita.hora;
+  document.getElementById('duracionCita').value = cita.duracion_minutos || 30;
   document.getElementById('motivoCita').value = cita.motivo || '';
   selectVeterinario.value = cita.id_veterinario;
 
@@ -246,6 +250,7 @@ formCita.addEventListener('submit', async (e) => {
     id_veterinario: selectVeterinario.value,
     fecha: document.getElementById('fechaCita').value,
     hora: document.getElementById('horaCita').value,
+    duracion_minutos: Number(document.getElementById('duracionCita').value || 30),
     motivo: document.getElementById('motivoCita').value || null,
     forzar: document.getElementById('forzarHorario').checked
   };
@@ -414,21 +419,15 @@ function irADiaEnLista(fechaStr) {
 async function atenderCita(id_paciente, id_cita) {
   const respuesta = await fetch(`${API_URL}/api/citas/${id_cita}/estado`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({ estado: 'en_atencion' })
   });
-
   if (!respuesta.ok) {
     const error = await respuesta.json();
     alert(error.mensaje || 'No se pudo iniciar la atención de esta cita');
     return;
   }
-
-  window.location.href =
-    `historia.html?id_paciente=${id_paciente}&id_cita=${id_cita}&nueva_consulta=1`;
+  window.location.href = `historia.html?id_paciente=${id_paciente}&id_cita=${id_cita}&nueva_consulta=1`;
 }
 
 let pacienteConsultaCita = null;

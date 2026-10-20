@@ -19,7 +19,7 @@ async function obtenerHistoria(req, res) {
 
 // CU15
 async function registrarProcedimiento(req, res) {
-  const { id_paciente, tipo, id_producto, cantidad, id_servicio, fecha, observaciones } = req.body;
+  const { id_paciente, tipo, id_producto, cantidad, id_servicio, fecha, fecha_proxima, observaciones } = req.body;
 
   if (!id_paciente || !tipo || !fecha) {
     return res.status(400).json({ mensaje: 'Paciente, tipo de procedimiento y fecha son obligatorios' });
@@ -37,12 +37,15 @@ async function registrarProcedimiento(req, res) {
   if (fecha > hoy) {
     return res.status(400).json({ mensaje: 'La fecha del procedimiento no puede ser futura' });
   }
+  if (fecha_proxima && fecha_proxima < hoy) {
+    return res.status(400).json({ mensaje: 'La fecha del próximo control no puede ser anterior a hoy' });
+  }
 
   try {
     const resultado = await historiaModel.registrarProcedimientoPreventivo({
       id_paciente, tipo, id_producto, cantidad, id_servicio,
       id_veterinario: req.usuario.id_usuario,
-      fecha, observaciones
+      fecha, fecha_proxima, observaciones
     });
 
     res.status(201).json({
@@ -68,4 +71,13 @@ async function registrarProcedimiento(req, res) {
   }
 }
 
-module.exports = { obtenerHistoria, registrarProcedimiento };
+async function seguimientos(req, res) {
+  try {
+    const dias = Math.min(Math.max(Number(req.query.dias) || 30, 1), 365);
+    res.json(await historiaModel.listarSeguimientosPreventivos(dias));
+  } catch (error) {
+    respuestaError(res, error);
+  }
+}
+
+module.exports = { obtenerHistoria, registrarProcedimiento, seguimientos };

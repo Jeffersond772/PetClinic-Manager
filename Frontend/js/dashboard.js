@@ -21,6 +21,7 @@ function formatearFecha(fecha) {
 const tarjetasResumenDashboard = document.getElementById('tarjetasResumenDashboard');
 const elFechaHoy = document.getElementById('fechaHoy');
 const listaProximasCitas = document.getElementById('listaProximasCitas');
+const listaPendientesDashboard = document.getElementById('listaPendientesDashboard');
 
 if (tarjetasResumenDashboard) {
 
@@ -103,6 +104,22 @@ if (tarjetasResumenDashboard) {
 
     } catch (error) {
       console.error('Error cargando próximas citas:', error);
+    }
+  }
+
+  async function cargarPendientes() {
+    if (!listaPendientesDashboard) return;
+    try {
+      const respuesta = await fetch(`${API_URL}/api/reportes/pendientes`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const p = await respuesta.json();
+      const secciones = [];
+      if (p.citasEnAtencion?.length) secciones.push(`<h4>Consultas sin finalizar (${p.citasEnAtencion.length})</h4><ul>${p.citasEnAtencion.map(c => `<li><a href="citas.html">${escaparHTML(c.paciente)} · ${escaparHTML(c.veterinario)} · ${String(c.hora).slice(0,5)}</a></li>`).join('')}</ul>`);
+      if (p.seguimientos?.length) secciones.push(`<h4>Vacunas y controles próximos o vencidos (${p.seguimientos.length})</h4><ul>${p.seguimientos.map(s => `<li><a href="historia.html?id_paciente=${encodeURIComponent(s.id_paciente)}">${escaparHTML(s.paciente)} · ${escaparHTML(s.tipo)} · ${String(s.fecha_proxima).slice(0,10)}</a></li>`).join('')}</ul>`);
+      if (p.productosBajoStock?.length) secciones.push(`<h4>Productos para reponer (${p.productosBajoStock.length})</h4><ul>${p.productosBajoStock.map(x => `<li><a href="productos.html">${escaparHTML(x.nombre)} · ${x.cantidad_disponible} disponibles</a></li>`).join('')}</ul>`);
+      listaPendientesDashboard.innerHTML = secciones.join('') || '<p class="texto-secundario">No hay pendientes por atender.</p>';
+    } catch (error) {
+      console.error('Error cargando pendientes:', error);
+      listaPendientesDashboard.innerHTML = '<p class="texto-secundario">No se pudieron cargar los pendientes.</p>';
     }
   }
 
@@ -200,5 +217,6 @@ if (tarjetasResumenDashboard) {
 
   cargarResumenDashboard();
   cargarProximasCitas();
+  cargarPendientes();
   cargarGraficosDashboard();
 }

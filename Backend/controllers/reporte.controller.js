@@ -105,5 +105,13 @@ const comprasProveedor = crearHandler(reporteModel.comprasPorProveedor);
 const ingresosServicio = crearHandler(reporteModel.ingresosPorServicio);
 const citasVeterinario = crearHandler(reporteModel.citasPorVeterinario);
 
+async function pendientes(req, res) {
+  try {
+    const datos = await reporteModel.pendientesOperativos();
+    datos.seguimientos = await require('../models/historia.model').listarSeguimientosPreventivos(30);
+    res.json(datos);
+  } catch (error) { respuestaError(res, error); }
+}
+
 module.exports = { ingresos, gastos, consultas, productosMovimiento, resumen, citasEstado,
-  ganancia, rentabilidad, comprasProveedor, ingresosServicio, citasVeterinario };
+  ganancia, rentabilidad, comprasProveedor, ingresosServicio, citasVeterinario, pendientes };

@@ -279,7 +279,6 @@ formConsulta.addEventListener('submit', async (e) => {
 
   const datos = {
     id_paciente: idPaciente,
-    id_cita: idCitaValida,
     motivo_consulta: document.getElementById('motivoConsulta').value || null,
     sintomas: document.getElementById('sintomas').value || null,
     signos_vitales: document.getElementById('signosVitales').value || null,
@@ -362,6 +361,7 @@ formProcedimiento.addEventListener('submit', async (e) => {
     cantidad,
     id_servicio,
     fecha: document.getElementById('fechaProcedimiento').value,
+    fecha_proxima: document.getElementById('fechaProximaProcedimiento').value || null,
     observaciones: document.getElementById('observacionesProcedimiento').value || null
   };
 
@@ -402,14 +402,10 @@ async function abrirConsultaDesdeCita() {
     const respuesta = await fetch(`${API_URL}/api/citas/${idCita}`, { headers: { 'Authorization': `Bearer ${token}` } });
     const cita = await respuesta.json();
 
-    if (
-  !respuesta.ok ||
-  String(cita.id_paciente) !== String(idPaciente) ||
-  !['programada', 'en_atencion'].includes(cita.estado)
-) {
-  mostrarAlerta('Esa cita ya no está disponible para atención o no corresponde a este paciente. Puedes registrar la consulta sin vincularla.');
-  return;
-}
+    if (!respuesta.ok || String(cita.id_paciente) !== String(idPaciente) || !['programada', 'en_atencion'].includes(cita.estado)) {
+      mostrarAlerta('Esa cita ya no está disponible para atención o no corresponde a este paciente. Puedes registrar la consulta sin vincularla.');
+      return;
+    }
     idCitaValida = cita.id_cita;
     document.getElementById('btnNuevaConsulta').click();
     document.getElementById('motivoConsulta').value = cita.motivo || '';
