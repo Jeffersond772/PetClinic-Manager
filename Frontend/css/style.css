@@ -2104,6 +2104,29 @@ body.modo-oscuro a:focus-visible {
   }
 }
 
+/* Tarjetas interactivas del resumen de pendientes */
+button.tarjeta-kpi {
+  width: 100%;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.tarjeta-kpi:focus-visible,
+.lista-proximas-citas a:focus-visible {
+  outline: 3px solid #1d5fa8;
+  outline-offset: 3px;
+}
+
+.lista-proximas-citas a.item-proxima-cita {
+  display: flex;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .buscador-auto { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
 .buscador-auto input { flex: 1; max-width: 420px; }
 .contador-busqueda { white-space: nowrap; }
