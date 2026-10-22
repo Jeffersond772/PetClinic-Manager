@@ -307,6 +307,13 @@ formConsulta.addEventListener('submit', async (e) => {
     modalConsulta.classList.add('oculto');
     await cargarHistoria();
 
+    if (idCitaValida) {
+      idCitaValida = null;
+      setTimeout(() => {
+        document.getElementById('btnAlertaOk').onclick = () => { window.location.href = 'citas.html'; };
+      }, 0);
+    }
+
     if (resultado.id_cuenta) {
       mostrarAlerta(`Consulta guardada. Se creó la venta #${resultado.id_cuenta} por $${formatearPrecio(resultado.total_facturado)}. Puedes verla y registrar el pago en Ventas.`);
     } else {

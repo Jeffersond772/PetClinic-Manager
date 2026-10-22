@@ -2131,6 +2131,52 @@ button.tarjeta-kpi:focus-visible,
 .buscador-auto input { flex: 1; max-width: 420px; }
 .contador-busqueda { white-space: nowrap; }
 
+/* ---- Pendientes de la clínica ---- */
+.pendientes-panel { margin-bottom: 18px; }
+
+.pendientes-detalle {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pendientes-grafico { position: relative; height: 220px; }
+
+.pendientes-panel .lista-proximas-citas { max-height: 240px; }
+
+.pendientes-panel a.item-proxima-cita {
+  text-decoration: none;
+  color: inherit;
+}
+
+.pendientes-panel a.item-proxima-cita strong { flex: 1; font-weight: 600; }
+.pendientes-panel a.item-proxima-cita > span:last-child { color: #1d9e75; font-size: 12px; font-weight: 600; }
+
+.pendientes-vacio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  text-align: center;
+  padding: 28px 16px;
+  border: 1px dashed #cfe8de;
+  border-radius: 12px;
+  background: #f4faf7;
+  color: #1d9e75;
+}
+.pendientes-vacio span { font-size: 12px; color: #777; }
+.pendientes-error { border-color: #f5c6c0; background: #fdecea; color: #a83226; }
+
+body.modo-oscuro .pendientes-vacio { background: #1f2a26; border-color: #2f4a40; }
+body.modo-oscuro .pendientes-error { background: #3a2020; border-color: #5a3030; color: #f0a099; }
+body.modo-oscuro .pendientes-vacio span { color: #aaa; }
+
+@media (max-width: 760px) {
+  .pendientes-detalle { grid-template-columns: 1fr; }
+}
+
 body.modo-oscuro .fila-formula {
   border-color: #303338;
 }

@@ -87,7 +87,7 @@ if (tarjetasResumenDashboard) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const resultado = await respuesta.json();
-      const citas = (resultado.citas || []).filter(c => c.estado === 'programada');
+      const citas = (resultado.citas || []).filter(c => ['programada', 'en_atencion'].includes(c.estado));
 
       if (citas.length === 0) {
         listaProximasCitas.innerHTML = `<p class="texto-secundario">No hay citas programadas para hoy.</p>`;
@@ -96,7 +96,7 @@ if (tarjetasResumenDashboard) {
 
       listaProximasCitas.innerHTML = citas.map(c => `
         <div class="item-proxima-cita">
-          <span class="hora-cita">${c.hora}</span>
+          <span class="hora-cita">${String(c.hora).slice(0, 5)}</span>
           <div>
             <strong>${escaparHTML(c.paciente)}</strong>
             <p class="texto-secundario">${escaparHTML(c.propietario)} · Dr(a). ${escaparHTML(c.veterinario)}</p>
@@ -110,121 +110,124 @@ if (tarjetasResumenDashboard) {
   }
 
   async function cargarPendientes() {
-  if (!listaPendientesDashboard) return;
+    if (!listaPendientesDashboard) return;
 
-  try {
-    const respuesta = await fetch(`${API_URL}/api/reportes/pendientes`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    const pendientes = await respuesta.json();
-
-    const grupos = [
-      {
-        nombre: 'Consultas abiertas',
-        total: pendientes.citasEnAtencion?.length || 0,
-        clase: 'acento-azul',
-        destino: 'citas.html'
-      },
-      {
-        nombre: 'Vacunas y controles',
-        total: pendientes.seguimientos?.length || 0,
-        clase: 'acento-verde',
-        destino: 'historia.html'
-      },
-      {
-        nombre: 'Productos por reponer',
-        total: pendientes.productosBajoStock?.length || 0,
-        clase: 'acento-rojo',
-        destino: 'productos.html'
-      }
-    ];
-
-    tarjetasPendientes.innerHTML = grupos.map((grupo, indice) => `
-      <button
-        type="button"
-        class="tarjeta-kpi ${grupo.clase} clickeable"
-        data-destino="${grupo.destino}"
-        style="animation-delay:${indice * 0.05}s"
-      >
-        <span class="valor-kpi">${grupo.total}</span>
-        <span class="etiqueta-kpi">${grupo.nombre}</span>
-        <span class="texto-secundario">Ver pendientes →</span>
-      </button>
-    `).join('');
-
-    tarjetasPendientes
-      .querySelectorAll('.clickeable')
-      .forEach(tarjeta => {
-        tarjeta.addEventListener('click', () => {
-          window.location.href = tarjeta.dataset.destino;
-        });
+    try {
+      const respuesta = await fetch(`${API_URL}/api/reportes/pendientes`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
+      if (!respuesta.ok) throw new Error(`Pendientes respondió ${respuesta.status}`);
+      const pendientes = await respuesta.json();
+
+      const grupos = [
+        {
+          nombre: 'Consultas abiertas',
+          total: pendientes.citasEnAtencion?.length || 0,
+          clase: 'acento-azul',
+          destino: 'citas.html'
+        },
+        {
+          nombre: 'Vacunas y controles',
+          total: pendientes.seguimientos?.length || 0,
+          clase: 'acento-verde',
+          destino: 'pacientes.html'
+        },
+        {
+          nombre: 'Productos por reponer',
+          total: pendientes.productosBajoStock?.length || 0,
+          clase: 'acento-rojo',
+          destino: 'productos.html'
+        }
+      ];
+
+      tarjetasPendientes.innerHTML = grupos.map((grupo, indice) => `
+              <div
+        class="tarjeta-kpi ${grupo.clase} clickeable"
+        data-destino="${grupo.destino}"
+        role="button"
+        tabindex="0"
+        style="animation-delay:${indice * 0.05}s"
+      >
+        <div class="valor-kpi">${grupo.total}</div>
+        <div class="etiqueta-kpi">${grupo.nombre}</div>
+        <div class="texto-secundario">Ver pendientes →</div>
+      </div>
+    `).join('');
+
+      tarjetasPendientes
+        .querySelectorAll('.clickeable')
+        .forEach(tarjeta => {
+          tarjeta.addEventListener('click', () => {
+            window.location.href = tarjeta.dataset.destino;
+          });
+        });
+
+          const hayPendientes = grupos.some(grupo => grupo.total > 0);
     const canvas = document.getElementById('graficoPendientes');
 
-    if (graficoPendientes) {
-      graficoPendientes.destroy();
-    }
+      if (graficoPendientes) {
+        graficoPendientes.destroy();
+      }
 
-    graficoPendientes = new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels: grupos.map(grupo => grupo.nombre),
+      graficoPendientes = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+        labels: hayPendientes ? grupos.map(grupo => grupo.nombre) : ['Sin pendientes'],
         datasets: [{
-          data: grupos.map(grupo => grupo.total),
-          backgroundColor: ['#1d5fa8', '#1d9e75', '#d64545'],
+          data: hayPendientes ? grupos.map(grupo => grupo.total) : [1],
+          backgroundColor: hayPendientes ? ['#1d5fa8', '#1d9e75', '#d64545'] : ['#d9dedc'],
           borderWidth: 0
         }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' }
         },
-        onClick: (_evento, elementos) => {
-          if (elementos.length) {
-            window.location.href = grupos[elementos[0].index].destino;
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          },
+          onClick: (_evento, elementos) => {
+            if (hayPendientes && elementos.length) {
+              window.location.href = grupos[elementos[0].index].destino;
+            }
           }
         }
-      }
-    });
+      });
 
-    const detalles = [
-      ...(pendientes.citasEnAtencion || []).map(cita => ({
-        texto: `${cita.paciente} · ${cita.veterinario} · ${String(cita.hora).slice(0, 5)}`,
-        href: 'citas.html',
-        tipo: 'Consulta abierta'
-      })),
-      ...(pendientes.seguimientos || []).map(seguimiento => ({
-        texto: `${seguimiento.paciente} · ${seguimiento.tipo} · ${String(seguimiento.fecha_proxima).slice(0, 10)}`,
-        href: `historia.html?id_paciente=${encodeURIComponent(seguimiento.id_paciente)}`,
-        tipo: 'Control preventivo'
-      })),
-      ...(pendientes.productosBajoStock || []).map(producto => ({
-        texto: `${producto.nombre} · ${producto.cantidad_disponible} disponibles (mínimo ${producto.stock_minimo})`,
-        href: 'productos.html',
-        tipo: 'Inventario'
-      }))
-    ];
+      const detalles = [
+        ...(pendientes.citasEnAtencion || []).map(cita => ({
+          texto: `${cita.paciente} · ${cita.veterinario} · ${String(cita.hora).slice(0, 5)}`,
+          href: 'citas.html',
+          tipo: 'Consulta abierta'
+        })),
+        ...(pendientes.seguimientos || []).map(seguimiento => ({
+          texto: `${seguimiento.paciente} · ${seguimiento.tipo} · ${String(seguimiento.fecha_proxima).slice(0, 10)}`,
+          href: `historia.html?id_paciente=${encodeURIComponent(seguimiento.id_paciente)}`,
+          tipo: 'Control preventivo'
+        })),
+        ...(pendientes.productosBajoStock || []).map(producto => ({
+          texto: `${producto.nombre} · ${producto.cantidad_disponible} disponibles (mínimo ${producto.stock_minimo})`,
+          href: 'productos.html',
+          tipo: 'Inventario'
+        }))
+      ];
 
-    listaPendientesDashboard.innerHTML = detalles.length
-      ? detalles.slice(0, 12).map(detalle => `
+      listaPendientesDashboard.innerHTML = detalles.length
+        ? detalles.slice(0, 12).map(detalle => `
           <a class="item-proxima-cita" href="${detalle.href}">
             <span class="hora-cita">${detalle.tipo}</span>
             <strong>${escaparHTML(detalle.texto)}</strong>
             <span>Ver →</span>
           </a>
         `).join('')
-      : '<p class="texto-secundario">No hay pendientes por atender.</p>';
+              : '<div class="pendientes-vacio"><strong>Todo al día</strong><span>No hay consultas abiertas, controles ni productos por reponer.</span></div>';
 
-  } catch (error) {
-    console.error('Error cargando pendientes:', error);
-    listaPendientesDashboard.innerHTML =
-      '<p class="texto-secundario">No se pudieron cargar los pendientes.</p>';
+    } catch (error) {
+      console.error('Error cargando pendientes:', error);
+            listaPendientesDashboard.innerHTML =
+        '<div class="pendientes-vacio pendientes-error"><strong>No se pudieron cargar los pendientes</strong><span>Revisa que la base de datos tenga las columnas nuevas y recarga.</span></div>';
+    }
   }
-}
 
   async function cargarGraficosDashboard() {
     try {

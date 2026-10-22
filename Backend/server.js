@@ -24,14 +24,6 @@ app.get('/', (req, res) => {
   res.json({ mensaje: 'API de PetClinic Manager funcionando correctamente 🐾' });
 });
 
-app.get('/test-db', async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT NOW() AS fecha_actual');
-    res.json({ mensaje: 'Conexión exitosa a MySQL', resultado: rows });
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error de conexión', error: error.message });
-  }
-});
 
 const limitadorLogin = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutos (usa 5 * 60 * 1000 para 5)
@@ -60,6 +52,18 @@ app.use('/api/servicios', require('./routes/servicios.routes'));
 app.use('/api/reportes', require('./routes/reportes.routes'));
 app.use('/api/proveedores', require('./routes/proveedores.routes'));
 app.use('/api/compras', require('./routes/compras.routes'));
+
+app.use((req, res) => {
+  res.status(404).json({ mensaje: 'Ruta no encontrada' });
+});
+
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ mensaje: 'El cuerpo de la petición no es un JSON válido' });
+  }
+  console.error(err);
+  res.status(500).json({ mensaje: 'Error en el servidor' });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

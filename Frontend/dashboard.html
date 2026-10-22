@@ -26,19 +26,20 @@
       <!-- Los enlaces se generan dinámicamente según el rol -->
     </nav>
 
-    <main class="contenido">
+        <main class="contenido">
       <h2 id="saludo">Bienvenido</h2>
       <p class="texto-secundario" id="fechaHoy"></p>
 
       <div class="tarjetas-resumen" id="tarjetasResumenDashboard"></div>
 
-      <div class="grid-graficos">
-      <section class="tarjeta-grafico">
-  <h3>Pendientes de la clínica</h3>
-  <div id="tarjetasPendientes" class="tarjetas-resumen"></div>
-</section>
-
-<div id="tarjetasPendientes" class="tarjetas-resumen"></div>
+      <section class="tarjeta-grafico pendientes-panel">
+        <h3>Pendientes de la clínica</h3>
+        <div id="tarjetasPendientes" class="tarjetas-resumen"></div>
+        <div class="pendientes-detalle">
+          <div class="pendientes-grafico"><canvas id="graficoPendientes"></canvas></div>
+          <div id="listaPendientesDashboard" class="lista-proximas-citas"></div>
+        </div>
+      </section>
 
       <div class="grid-graficos">
         <div class="tarjeta-grafico">

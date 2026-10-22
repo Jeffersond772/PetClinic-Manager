@@ -1,6 +1,7 @@
 const historiaModel = require('../models/historia.model');
 const { respuestaError } = require('../utils/manejarError');
 const { obtenerFechaHoyLocal } = require('../utils/fecha');
+const { cerrarCitaPorAtencion } = require('../utils/cerrarCita');
 
 // CU14
 async function obtenerHistoria(req, res) {
@@ -47,6 +48,12 @@ async function registrarProcedimiento(req, res) {
       id_veterinario: req.usuario.id_usuario,
       fecha, fecha_proxima, observaciones
     });
+
+  try {
+      await cerrarCitaPorAtencion(req.body.id_cita, req.body.id_paciente);
+    } catch (errorCita) {
+      console.error('No se pudo cerrar la cita:', errorCita);
+    }
 
     res.status(201).json({
       mensaje: resultado.id_cuenta
